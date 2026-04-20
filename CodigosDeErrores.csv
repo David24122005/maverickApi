@@ -1,0 +1,10 @@
+Código,Nombre,¿Cuándo usarlo en tu API?
+200,OK,La petición GET se resolvió correctamente (Ej. Traer la lista de usuarios o un usuario por ID).
+201,Created,Un POST fue exitoso y se creó un nuevo registro en la base de datos (Ej. Crear un usuario).
+204,No Content,"Un DELETE o PUT fue exitoso, pero no hay datos adicionales que devolver en el JSON."
+400,Bad Request,"El usuario mandó datos incompletos, mal formateados o que no pasan las validaciones de negocio."
+401,Unauthorized,"El cliente no envió el Token JWT, o el token enviado ya expiró o es inválido."
+403,Forbidden,"El cliente tiene un Token válido, pero no tiene permisos para acceder a esa ruta (Ej. Es un usuario normal queriendo acceder a una ruta de Administrador)."
+404,Not Found,El recurso solicitado no existe en la base de datos (Ej. Buscar el usuario con ID 9999 y no está).
+409,Conflict,"La petición entra en conflicto con el estado actual del servidor (Ej. Intentar registrar un correo que ya existe. Muchos usan el 400 para esto, pero el 409 es el más exacto)."
+500,Internal Server Error,Ocurrió una excepción try-catch no controlada en el código C# o se cayó la base de datos.

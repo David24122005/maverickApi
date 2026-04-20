@@ -47,6 +47,7 @@ namespace maverickApi.Services
                         Datos = null
                     };
                 }
+                usuario.PasswordHash = "";
                 var cliente = await _dbContext.Clientes.FirstOrDefaultAsync(c => c.Id == venta.ClienteId);
                 if (cliente == null)
                 {
@@ -72,7 +73,11 @@ namespace maverickApi.Services
                 decimal Subtotal = 0;
                 foreach (var item in venta.Detalles)
                 {
-                    var producto = await _dbContext.Productos.FindAsync(item.ProductoId);
+                    var producto = await _dbContext.Productos
+                    .Include(p => p.Categoria)
+                    .Include(p => p.Proveedor)
+                    .Where(p => p.Id == item.ProductoId)
+                    .FirstOrDefaultAsync();
                     if (producto == null)
                     {
                         return new RespuestaApi<Venta>
@@ -104,10 +109,10 @@ namespace maverickApi.Services
                     producto.Stock -= item.Cantidad;
                     Subtotal += subDetalle;
                 }
-                nuevaVenta.Subtotal = Subtotal;
+                nuevaVenta.Descuento = venta.Descuento;
+                nuevaVenta.Subtotal = Subtotal - nuevaVenta.Descuento;
                 nuevaVenta.Iva = Math.Round(nuevaVenta.Subtotal * 0.16m, 2);
-                nuevaVenta.Total = nuevaVenta.Subtotal - nuevaVenta.Descuento + nuevaVenta.Iva;
-
+                nuevaVenta.Total = nuevaVenta.Subtotal + nuevaVenta.Iva;
                 _dbContext.Ventas.Add(nuevaVenta);
                 await _dbContext.SaveChangesAsync();
                 await tx.CommitAsync();

@@ -169,6 +169,9 @@ namespace maverickApi.Services
                         Datos = null
                     };
                 }
+
+                productos.ForEach(p => p.Categoria = null);
+
                 return new RespuestaApi<List<Producto>>
                 {
                     Exito = true,
@@ -186,10 +189,6 @@ namespace maverickApi.Services
                 };
             }
         }
-
-
-
-
         public async Task<RespuestaApi<Producto>> EditarProductoAsync(EditarProductoDto editarProductoDto)
         {
             using var tx = await _dbContext.Database.BeginTransactionAsync();

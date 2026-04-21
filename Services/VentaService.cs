@@ -22,7 +22,6 @@ namespace maverickApi.Services
         public async Task<RespuestaApi<Venta>> CrearVentaAsync(Venta venta)
         {
             using var tx = await _dbContext.Database.BeginTransactionAsync();
-
             try
             {
                 var user = _httpContextAccessor.HttpContext?.User;
@@ -69,8 +68,7 @@ namespace maverickApi.Services
 
                 nuevaVenta.Detalles = new List<DetalleVenta>();
 
-
-                decimal Subtotal = 0;
+                decimal SubtotalBruto = 0;
                 foreach (var item in venta.Detalles)
                 {
                     var producto = await _dbContext.Productos
@@ -107,10 +105,11 @@ namespace maverickApi.Services
                         Subtotal = subDetalle
                     });
                     producto.Stock -= item.Cantidad;
-                    Subtotal += subDetalle;
+                    SubtotalBruto += subDetalle;
                 }
+                nuevaVenta.SubtotalBruto = SubtotalBruto;
                 nuevaVenta.Descuento = venta.Descuento;
-                nuevaVenta.Subtotal = Subtotal - nuevaVenta.Descuento;
+                nuevaVenta.Subtotal = SubtotalBruto - nuevaVenta.Descuento;
                 nuevaVenta.Iva = Math.Round(nuevaVenta.Subtotal * 0.16m, 2);
                 nuevaVenta.Total = nuevaVenta.Subtotal + nuevaVenta.Iva;
                 _dbContext.Ventas.Add(nuevaVenta);
@@ -122,7 +121,6 @@ namespace maverickApi.Services
                     Mensaje = "Venta creada con exito",
                     Datos = nuevaVenta
                 };
-
             }
             catch
             {
@@ -135,7 +133,6 @@ namespace maverickApi.Services
                 };
             }
         }
-
         public async Task<RespuestaApi<List<Venta>>> ObtenerVentasAsync()
         {
             try
@@ -168,7 +165,6 @@ namespace maverickApi.Services
                 };
             }
         }
-
         public async Task<int> ObtenerSiguienteVentaAsync()
         {
             var fechaHoy = DateTime.Now.ToString("yyyyMMdd");

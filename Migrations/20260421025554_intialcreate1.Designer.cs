@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using maverickApi.Data;
 
@@ -11,9 +12,11 @@ using maverickApi.Data;
 namespace MaverickApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260421025554_intialcreate1")]
+    partial class intialcreate1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -319,9 +322,9 @@ namespace MaverickApi.Migrations
                             Admin = true,
                             Apellidos = "Sistema",
                             Email = "admin@maverick.com",
-                            FechaCreacion = new DateTime(2026, 4, 20, 3, 33, 59, 518, DateTimeKind.Utc).AddTicks(3330),
+                            FechaCreacion = new DateTime(2026, 4, 21, 2, 55, 53, 959, DateTimeKind.Utc).AddTicks(469),
                             Nombre = "Admin",
-                            PasswordHash = "$2a$11$lKFhYGD2SHFCVRRxpaHuKuW/KbgUjA55BAIfPL2QvGZogxcnmbGgu"
+                            PasswordHash = "$2a$11$kXopFolIJPTzhYCyluwAjuSbJNyVsOxQ1EmThBrQyQtf.OkWMALRu"
                         });
                 });
 
@@ -343,16 +346,19 @@ namespace MaverickApi.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("Iva")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("NumeroVenta")
                         .HasColumnType("longtext");
 
                     b.Property<decimal>("Subtotal")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("SubtotalBruto")
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("Total")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("int");
@@ -423,13 +429,15 @@ namespace MaverickApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("maverickApi.Models.Proveedor", null)
+                    b.HasOne("maverickApi.Models.Proveedor", "Proveedor")
                         .WithMany()
                         .HasForeignKey("ProveedorId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Categoria");
+
+                    b.Navigation("Proveedor");
                 });
 
             modelBuilder.Entity("maverickApi.Models.Venta", b =>

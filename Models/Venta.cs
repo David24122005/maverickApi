@@ -12,11 +12,13 @@ namespace maverickApi.Models
         public Usuario? Usuario { get; set; }
         public int ClienteId { get; set; }
         public Cliente? Cliente { get; set; }
-        [Column(TypeName = "decimal(18,2)")]
+        [Column(TypeName = "decimal(18,4)")]
+        public decimal SubtotalBruto { get; set; }
+        [Column(TypeName = "decimal(18,4)")]
         public decimal Subtotal { get; set; }
-        [Column(TypeName = "decimal(18,2)")]
+        [Column(TypeName = "decimal(18,4)")]
         public decimal Iva { get; set; }
-        [Column(TypeName = "decimal(18,2)")]
+        [Column(TypeName = "decimal(18,4)")]
         public decimal Total { get; set; }
         public decimal Descuento { get; set; } = 0;
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;

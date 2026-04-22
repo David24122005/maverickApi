@@ -28,7 +28,7 @@ namespace maverickApi.Data
             modelBuilder.Entity<Usuario>().HasData(
             new Usuario
             {
-                Id = 1000,
+                Id = 1,
                 Nombre = "Admin",
                 Apellidos = "Sistema",
                 Email = "admin@maverick.com",
@@ -41,12 +41,12 @@ namespace maverickApi.Data
             base.OnModelCreating(modelBuilder);
             // ===== Categoria ====
             modelBuilder.Entity<Categoria>()
-            .HasMany(v => v.Productos)
-            .WithOne(p => p.Categoria)
-            .HasForeignKey(p => p.CategoriaId)
-            .OnDelete(DeleteBehavior.Restrict);
+                .HasMany(v => v.Productos)
+                .WithOne(p => p.Categoria)
+                .HasForeignKey(p => p.CategoriaId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // ===== RELACIONES DE VENTA =====
+            // ===== VENTA =====
 
             // Venta - Usuario
             modelBuilder.Entity<Venta>()
@@ -76,7 +76,7 @@ namespace maverickApi.Data
                 .HasForeignKey(d => d.ProductoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // ===== RELACIONES DE ORDEN COMPRA =====
+            // ===== ORDEN COMPRA =====
 
             modelBuilder.Entity<OrdenCompra>()
                 .HasOne<Proveedor>()
@@ -102,6 +102,12 @@ namespace maverickApi.Data
                 .HasForeignKey(doc => doc.ProductoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // ==== Proveedor ====
+            modelBuilder.Entity<Proveedor>()
+                .HasMany(p => p.Productos)
+                .WithOne(pd => pd.Proveedor)
+                .HasForeignKey(pd => pd.ProveedorId)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
             // ===== ÍNDICES UNIQUE =====

@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using maverickApi.Data;
 
@@ -12,11 +11,9 @@ using maverickApi.Data;
 namespace MaverickApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260421025554_intialcreate1")]
-    partial class intialcreate1
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -194,8 +191,11 @@ namespace MaverickApi.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("CategoriaId")
+                    b.Property<int?>("CategoriaId")
                         .HasColumnType("int");
+
+                    b.Property<string>("CodigoBarras")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Descripcion")
                         .HasColumnType("longtext");
@@ -218,7 +218,7 @@ namespace MaverickApi.Migrations
                     b.Property<decimal>("PrecioVenta")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("ProveedorId")
+                    b.Property<int?>("ProveedorId")
                         .HasColumnType("int");
 
                     b.Property<string>("Sku")
@@ -317,14 +317,14 @@ namespace MaverickApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1000,
+                            Id = 1,
                             Activo = true,
                             Admin = true,
                             Apellidos = "Sistema",
                             Email = "admin@maverick.com",
-                            FechaCreacion = new DateTime(2026, 4, 21, 2, 55, 53, 959, DateTimeKind.Utc).AddTicks(469),
+                            FechaCreacion = new DateTime(2026, 4, 22, 3, 47, 58, 549, DateTimeKind.Utc).AddTicks(3129),
                             Nombre = "Admin",
-                            PasswordHash = "$2a$11$kXopFolIJPTzhYCyluwAjuSbJNyVsOxQ1EmThBrQyQtf.OkWMALRu"
+                            PasswordHash = "$2a$11$i8MEu/b1uW4nyukDmPdEEuuaBzu1pT9RqA.jbsPZb/Qvi/zYV357K"
                         });
                 });
 
@@ -426,14 +426,12 @@ namespace MaverickApi.Migrations
                     b.HasOne("maverickApi.Models.Categoria", "Categoria")
                         .WithMany("Productos")
                         .HasForeignKey("CategoriaId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("maverickApi.Models.Proveedor", "Proveedor")
-                        .WithMany()
+                        .WithMany("Productos")
                         .HasForeignKey("ProveedorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Categoria");
 
@@ -460,6 +458,11 @@ namespace MaverickApi.Migrations
                 });
 
             modelBuilder.Entity("maverickApi.Models.Categoria", b =>
+                {
+                    b.Navigation("Productos");
+                });
+
+            modelBuilder.Entity("maverickApi.Models.Proveedor", b =>
                 {
                     b.Navigation("Productos");
                 });

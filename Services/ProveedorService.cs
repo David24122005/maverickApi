@@ -66,7 +66,9 @@ namespace maverickApi.Services
         {
             try
             {
-                var proveedores = await _dbContext.Proveedores.ToListAsync();
+                var proveedores = await _dbContext.Proveedores
+                .Include(p => p.Productos)
+                .ToListAsync();
                 if (proveedores == null || proveedores.Count == 0)
                 {
                     return new RespuestaApi<List<Proveedor>>
@@ -107,7 +109,9 @@ namespace maverickApi.Services
                     };
                 }
                 busqueda = busqueda.ToLower();
-                var proveedores = await _dbContext.Proveedores.Where(p =>
+                var proveedores = await _dbContext.Proveedores
+                .Include(p => p.Productos)
+                .Where(p =>
                 EF.Functions.Like(p.Nombre.ToLower(), $"%{busqueda}%") ||
                 EF.Functions.Like(p.Rfc.ToLower(), $"%{busqueda}%") ||
                 EF.Functions.Like(p.Email.ToLower(), $"%{busqueda}%") ||

@@ -175,7 +175,7 @@ namespace maverickApi.Services
                 {
                     usuarioExistente.Email = editarUsuarioDto.Email;
                 }
-                if (editarUsuarioDto.Admin != null)
+                if (editarUsuarioDto.Admin != usuarioExistente.Admin)
                 {
                     usuarioExistente.Admin = editarUsuarioDto.Admin;
                 }

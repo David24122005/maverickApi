@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Linq.Expressions;
+using System.Net.Http.Headers;
 using maverickApi.Data;
 using maverickApi.Dtos;
 using maverickApi.Interfaces;
@@ -27,8 +28,9 @@ namespace maverickApi.Services
 
             try
             {
-                if (string.IsNullOrWhiteSpace(producto.Nombre) || string.IsNullOrWhiteSpace(producto.Descripcion) || string.IsNullOrWhiteSpace(producto.Sku) || string.IsNullOrWhiteSpace(producto.Marca) || producto.PrecioCompra <= 0 || producto.PrecioVenta <= 0 || string.IsNullOrWhiteSpace(producto.Modelo) || producto.CategoriaId <= 0 || producto.ProveedorId <= 0)
+                if (string.IsNullOrWhiteSpace(producto.CodigoBarras) || string.IsNullOrWhiteSpace(producto.Nombre) || string.IsNullOrWhiteSpace(producto.Descripcion) || string.IsNullOrWhiteSpace(producto.Sku) || string.IsNullOrWhiteSpace(producto.Marca) || producto.PrecioCompra <= 0 || producto.PrecioVenta <= 0 || string.IsNullOrWhiteSpace(producto.Modelo) || producto.CategoriaId <= 0 || producto.ProveedorId <= 0)
                 {
+                    await tx.RollbackAsync();
                     return new RespuestaApi<Producto>
                     {
                         Exito = false,
@@ -40,6 +42,7 @@ namespace maverickApi.Services
                 var SkuExiste = await _dbContext.Productos.AnyAsync(p => p.Sku == producto.Sku);
                 if (SkuExiste)
                 {
+                    await tx.RollbackAsync();
                     return new RespuestaApi<Producto>
                     {
                         Exito = false,
@@ -47,9 +50,23 @@ namespace maverickApi.Services
                         Datos = null
                     };
                 }
+                producto.CodigoBarras = producto.CodigoBarras.Replace(" ", "");
+                var codigoBarrasExiste = await _dbContext.Productos
+                    .AnyAsync(p => p.CodigoBarras == producto.CodigoBarras);
+                if (codigoBarrasExiste)
+                {
+                    await tx.RollbackAsync();
+                    return new RespuestaApi<Producto>
+                    {
+                        Exito = false,
+                        Mensaje = "El codigo de barras se encuentra registrado en otro producto.",
+                        Datos = null
+                    };
+                }
                 var proveedor = await _dbContext.Proveedores.FirstOrDefaultAsync(p => p.Id == producto.ProveedorId);
                 if (proveedor == null)
                 {
+                    await tx.RollbackAsync();
                     return new RespuestaApi<Producto>
                     {
                         Exito = false,
@@ -61,6 +78,7 @@ namespace maverickApi.Services
                 var categoria = await _dbContext.Categorias.FirstOrDefaultAsync(c => c.Id == producto.CategoriaId);
                 if (categoria == null)
                 {
+                    await tx.RollbackAsync();
                     return new RespuestaApi<Producto>
                     {
                         Exito = false,
@@ -99,6 +117,7 @@ namespace maverickApi.Services
                 var productos = await _dbContext.Productos
                 .Include(p => p.Categoria)
                 .Include(p => p.Proveedor)
+                .OrderByDescending(p => p.Activo)
                 .ToListAsync();
 
                 if (productos.Count == 0)
@@ -110,8 +129,8 @@ namespace maverickApi.Services
                         Datos = null
                     };
                 }
-                productos.ForEach(p => p.Categoria = null);
-                productos.ForEach(p => p.Proveedor = null);
+                productos.ForEach(p => p.Categoria.Productos = null);
+                productos.ForEach(p => p.Proveedor.Productos = null);
 
                 return new RespuestaApi<List<Producto>>
                 {
@@ -152,13 +171,14 @@ namespace maverickApi.Services
                 .Where(p =>
                 EF.Functions.Like(p.Nombre.ToLower(), $"%{busqueda}%") ||
                 EF.Functions.Like(p.Descripcion.ToLower(), $"%{busqueda}%") ||
+                EF.Functions.Like(p.CodigoBarras.ToLower(), $"%{busqueda}%") ||
                 EF.Functions.Like(p.Sku.ToLower(), $"%{busqueda}%") ||
                 EF.Functions.Like(p.Marca.ToLower(), $"%{busqueda}%") ||
                 EF.Functions.Like(p.Modelo.ToLower(), $"%{busqueda}%") ||
                 EF.Functions.Like(p.Categoria.Nombre.ToLower(), $"%{busqueda}%") ||
                 (busqueda == "activo" && p.Activo) ||
-                (busqueda == "inactivo" && !p.Activo)
-                ).ToListAsync();
+                (busqueda == "inactivo" && !p.Activo))
+                .ToListAsync();
 
                 if (productos.Count == 0)
                 {
@@ -220,10 +240,10 @@ namespace maverickApi.Services
                 }
                 if (editarProductoDto.CategoriaId.HasValue && editarProductoDto.CategoriaId > 0)
                 {
-                    var categoriaExiste = await _dbContext.Categorias
-                        .AnyAsync(c => c.Id == editarProductoDto.CategoriaId);
+                    var categoriaNueva = await _dbContext.Categorias
+                        .FirstOrDefaultAsync(c => c.Id == editarProductoDto.CategoriaId);
 
-                    if (!categoriaExiste)
+                    if (categoriaNueva == null)
                     {
                         return new RespuestaApi<Producto>
                         {
@@ -232,7 +252,39 @@ namespace maverickApi.Services
                             Datos = null
                         };
                     }
-                    productoExistente.CategoriaId = editarProductoDto.CategoriaId.Value;
+                    productoExistente.CategoriaId = editarProductoDto.CategoriaId;
+                }
+                if (editarProductoDto.ProveedorId.HasValue && editarProductoDto.ProveedorId > 0)
+                {
+                    var proveedorNuevo = await _dbContext.Proveedores
+                        .FirstOrDefaultAsync(p => p.Id == editarProductoDto.ProveedorId);
+                    if (proveedorNuevo == null)
+                    {
+                        return new RespuestaApi<Producto>
+                        {
+                            Exito = false,
+                            Mensaje = "el proveedor seleccionado no existe.",
+                            Datos = null
+                        };
+                    }
+                    productoExistente.ProveedorId = editarProductoDto.ProveedorId;
+                    productoExistente.Proveedor = proveedorNuevo;
+                }
+                if (!string.IsNullOrWhiteSpace(editarProductoDto.CodigoBarras))
+                {
+                    editarProductoDto.CodigoBarras.Replace(" ", "");
+                    var codigoBarrasExiste = await _dbContext.Productos
+                        .AnyAsync(p => p.CodigoBarras == editarProductoDto.CodigoBarras);
+                    if (codigoBarrasExiste)
+                    {
+                        return new RespuestaApi<Producto>
+                        {
+                            Exito = false,
+                            Mensaje = "El codigo de barras ya existe en otro producto.",
+                            Datos = null
+                        };
+                    }
+                    productoExistente.CodigoBarras = editarProductoDto.CodigoBarras;
                 }
                 if (!string.IsNullOrWhiteSpace(editarProductoDto.Nombre))
                 {

@@ -11,6 +11,7 @@ namespace maverickApi.Models
         public string? Direccion { get; set; } = string.Empty;
         public string? Rfc { get; set; }
         public bool Activo { get; set; } = true;
+        public ICollection<Producto>? Productos { get; set; }
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
     }
 }

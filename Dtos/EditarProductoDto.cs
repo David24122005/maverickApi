@@ -7,11 +7,12 @@ namespace maverickApi.Dtos
         public string? Nombre { get; set; }
         public string? Descripcion { get; set; }
         public string? Sku { get; set; }
+        public string? CodigoBarras { get; set; }
         public string? Marca { get; set; }
         public string? Modelo { get; set; }
         public int? CategoriaId { get; set; }
+        public int? ProveedorId { get; set; }
         public int Stock { get; set; }
-        public string? CategoriaNombre { get; set; }
         public decimal PrecioCompra { get; set; }
         public decimal PrecioVenta { get; set; }
     }

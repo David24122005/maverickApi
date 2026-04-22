@@ -137,7 +137,13 @@ namespace maverickApi.Services
         {
             try
             {
-                var ventas = await _dbContext.Ventas.Include(v => v.Cliente).Include(v => v.Usuario).Include(v => v.Detalles).ThenInclude(d => d.Producto).OrderByDescending(v => v.FechaCreacion).ToListAsync();
+                var ventas = await _dbContext.Ventas
+                .Include(v => v.Cliente)
+                .Include(v => v.Usuario)
+                .Include(v => v.Detalles)
+                .ThenInclude(d => d.Producto)
+                .OrderByDescending(v => v.FechaCreacion)
+                .ToListAsync();
 
                 if (ventas == null || ventas.Count == 0)
                 {

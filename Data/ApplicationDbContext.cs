@@ -3,6 +3,7 @@ using System.Net.NetworkInformation;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
 using maverickApi.Models;
+using maverickApi.Services;
 using Microsoft.EntityFrameworkCore;
 //Este es un mensaje para el proximo programador que revise este codigo hoy 07/04/2026 se realizo este codigo se integran las funciones para migrar de base de datos, declarando las reglas de los modelos protegiendo asi que no se eliminen los registros para evitar errores en el negocio
 namespace maverickApi.Data
@@ -24,7 +25,7 @@ namespace maverickApi.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //Debe eliminarse al Desplegar la api
+            //Insertar usuarios
             modelBuilder.Entity<Usuario>().HasData(
             new Usuario
             {
@@ -36,8 +37,238 @@ namespace maverickApi.Data
                 Admin = true,
                 Activo = true,
                 FechaCreacion = DateTime.UtcNow
-            }
-        );
+            },
+            new Usuario
+            {
+                Id = 2,
+                Nombre = "Ventas",
+                Apellidos = "Sistema",
+                Email = "ventasr@maverick.com",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Ventas123"),
+                Admin = false,
+                Activo = true,
+                FechaCreacion = DateTime.UtcNow
+            });
+
+
+            //Insertar categorias
+
+            modelBuilder.Entity<Categoria>().HasData(
+                new Categoria
+                {
+                    Id = 1,
+                    Nombre = "Motor",
+                    Descripcion = "Material para motor",
+                    Productos = new List<Producto>()
+
+                },
+                new Categoria
+                {
+                    Id = 2,
+                    Nombre = "Transmision",
+                    Descripcion = "Material para transmision",
+                    Productos = new List<Producto>()
+
+                },
+                new Categoria
+                {
+                    Id = 3,
+                    Nombre = "Suspension",
+                    Descripcion = "Material para suspension",
+                    Productos = new List<Producto>()
+
+                },
+                new Categoria
+                {
+                    Id = 4,
+                    Nombre = "Embrague",
+                    Descripcion = "Material para Embrague",
+                    Productos = new List<Producto>()
+
+                },
+                 new Categoria
+                 {
+                     Id = 5,
+                     Nombre = "Hidraulica",
+                     Descripcion = "Material de Hidraulica",
+                     Productos = new List<Producto>()
+
+                 });
+            // //Insertar proveedores
+            modelBuilder.Entity<Proveedor>().HasData(
+                new Proveedor
+                {
+                    Id = 1,
+                    Nombre = "Autozone SA de CV",
+                    Email = "autozone@autozone.com",
+                    Telefono = "5506667812",
+                    Direccion = "Col Miguel Hidalgo, Ciudad de Mexico.",
+                    Rfc = "A12345678",
+                    Activo = true,
+                    Productos = new List<Producto>(),
+                    FechaCreacion = DateTime.UtcNow
+
+                },
+                new Proveedor
+                {
+                    Id = 2,
+                    Nombre = "Hidraulica Diviro SA de CV",
+                    Email = "diviro@hotmail.com",
+                    Telefono = "6671020304",
+                    Direccion = "Blvd Benjamin Hill Culiacan Sin.",
+                    Rfc = "H1234567890",
+                    Activo = true,
+                    Productos = new List<Producto>(),
+                    FechaCreacion = DateTime.UtcNow
+
+                },
+                new Proveedor
+                {
+                    Id = 3,
+                    Nombre = "Mantenimientos y Servicios Daguza SA de CV",
+                    Email = "daguza@hotmail.com",
+                    Telefono = "6673121914",
+                    Direccion = "Blvd Enrique Cabrera Culiacan Sin.",
+                    Rfc = "D12345",
+                    Activo = false,
+                    Productos = new List<Producto>(),
+                    FechaCreacion = DateTime.UtcNow
+
+                });
+            // //Insertar productos
+            modelBuilder.Entity<Producto>().HasData(
+                new Producto
+                {
+                    Id = 1,
+                    Sku = "bnd-1234",
+                    CodigoBarras = "1086543",
+                    Stock = 100,
+                    Nombre = "Banda 10 pulgadas",
+                    Descripcion = "Banda de motor de 10 pulgadas.",
+                    PrecioCompra = 450,
+                    PrecioVenta = 905,
+                    Marca = "Autozone",
+                    Modelo = "hrmg1224",
+                    CategoriaId = 1,
+                    ProveedorId = 1,
+                    Activo = true,
+                    FechaCreacion = DateTime.UtcNow
+
+                },
+                new Producto
+                {
+                    Id = 2,
+                    Sku = "sdt-2333",
+                    CodigoBarras = "85728750",
+                    Stock = 100,
+                    Nombre = "Soporte de transmision",
+                    Descripcion = "Soporte de transmision para Toyota Corolla 2000 - 2013 ",
+                    PrecioCompra = 250,
+                    PrecioVenta = 750,
+                    Marca = "Autozone",
+                    Modelo = "sop3456",
+                    CategoriaId = 2,
+                    ProveedorId = 1,
+                    Activo = true,
+                    FechaCreacion = DateTime.UtcNow
+
+                },
+                new Producto
+                {
+                    Id = 3,
+                    Sku = "hit-37698",
+                    CodigoBarras = "254324378",
+                    Stock = 100,
+                    Nombre = "Horquilla inferior",
+                    Descripcion = "Horquilla inferior trasera de fiat 100",
+                    PrecioCompra = 344,
+                    PrecioVenta = 1200,
+                    Marca = "Autozone",
+                    Modelo = "horin1243254",
+                    CategoriaId = 3,
+                    ProveedorId = 1,
+                    Activo = true,
+                    FechaCreacion = DateTime.UtcNow
+
+                },
+                new Producto
+                {
+                    Id = 4,
+                    Sku = "pet-32434",
+                    CodigoBarras = "38748543",
+                    Stock = 100,
+                    Nombre = "Piston elevador trasero",
+                    Descripcion = "Piston eleveador trasero",
+                    PrecioCompra = 12500,
+                    PrecioVenta = 23400,
+                    Marca = "Diviro",
+                    Modelo = "piset567",
+                    CategoriaId = 5,
+                    ProveedorId = 2,
+                    Activo = true,
+                    FechaCreacion = DateTime.UtcNow
+
+                },
+                new Producto
+                {
+                    Id = 5,
+                    Sku = "lh-3435",
+                    CodigoBarras = "56765643",
+                    Stock = 100,
+                    Nombre = "Linea de hidarulico",
+                    Descripcion = "Linea del hidarulico",
+                    PrecioCompra = 1255,
+                    PrecioVenta = 20300,
+                    Marca = "Diviro",
+                    Modelo = "lihid213",
+                    CategoriaId = 5,
+                    ProveedorId = 2,
+                    Activo = true,
+                    FechaCreacion = DateTime.UtcNow
+
+                },
+                new Producto
+                {
+                    Id = 6,
+                    Sku = "",
+                    CodigoBarras = "325783",
+                    Stock = 100,
+                    Nombre = "Rin 14 pulgadas",
+                    Descripcion = "Rin de fibra de carbono de 14 pulgadas",
+                    PrecioCompra = 1230,
+                    PrecioVenta = 2500,
+                    Marca = "Daguza",
+                    Modelo = "Rifi69",
+                    CategoriaId = 5,
+                    ProveedorId = 3,
+                    Activo = false,
+                    FechaCreacion = DateTime.UtcNow
+
+                }
+            );
+            modelBuilder.Entity<Cliente>().HasData(
+                new Cliente
+                {
+                    Id = 1,
+                    Nombre = "Taller el giro",
+                    Rfc = "24sa12e",
+                    Telefono = "456734",
+                    Email = "hiro@hotmail.com",
+                    Activo = true,
+                    FechaCreacion = DateTime.Now
+                },
+                new Cliente
+                {
+                    Id = 2,
+                    Nombre = "Michael Jackson",
+                    Rfc = "345s32r",
+                    Telefono = "56732245",
+                    Email = "michael@gmail.com",
+                    Activo = true,
+                    FechaCreacion = DateTime.Now
+                }
+            );
+
             base.OnModelCreating(modelBuilder);
             // ===== Categoria ====
             modelBuilder.Entity<Categoria>()

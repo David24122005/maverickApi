@@ -39,6 +39,38 @@ namespace MaverickApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categorias");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Descripcion = "Material para motor",
+                            Nombre = "Motor"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Descripcion = "Material para transmision",
+                            Nombre = "Transmision"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Descripcion = "Material para suspension",
+                            Nombre = "Suspension"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Descripcion = "Material para Embrague",
+                            Nombre = "Embrague"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Descripcion = "Material de Hidraulica",
+                            Nombre = "Hidraulica"
+                        });
                 });
 
             modelBuilder.Entity("maverickApi.Models.Cliente", b =>
@@ -73,6 +105,28 @@ namespace MaverickApi.Migrations
                         .IsUnique();
 
                     b.ToTable("Clientes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Activo = true,
+                            Email = "hiro@hotmail.com",
+                            FechaCreacion = new DateTime(2026, 4, 22, 8, 53, 6, 936, DateTimeKind.Local).AddTicks(1348),
+                            Nombre = "Taller el giro",
+                            Rfc = "24sa12e",
+                            Telefono = "456734"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Activo = true,
+                            Email = "furro@gmail.com",
+                            FechaCreacion = new DateTime(2026, 4, 22, 8, 53, 6, 938, DateTimeKind.Local).AddTicks(6232),
+                            Nombre = "Cristian Peña",
+                            Rfc = "c3273278j",
+                            Telefono = "5673245"
+                        });
                 });
 
             modelBuilder.Entity("maverickApi.Models.DetalleOrdenCompra", b =>
@@ -239,6 +293,110 @@ namespace MaverickApi.Migrations
                         .IsUnique();
 
                     b.ToTable("Productos");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Activo = true,
+                            CategoriaId = 1,
+                            CodigoBarras = "1086543",
+                            Descripcion = "Banda de motor de 10 pulgadas.",
+                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(5661),
+                            Marca = "Autozone",
+                            Modelo = "hrmg1224",
+                            Nombre = "Banda 10 pulgadas",
+                            PrecioCompra = 450m,
+                            PrecioVenta = 905m,
+                            ProveedorId = 1,
+                            Sku = "bnd-1234",
+                            Stock = 100
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Activo = true,
+                            CategoriaId = 2,
+                            CodigoBarras = "85728750",
+                            Descripcion = "Soporte de transmision para Toyota Corolla 2000 - 2013 ",
+                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6321),
+                            Marca = "Autozone",
+                            Modelo = "sop3456",
+                            Nombre = "Soporte de transmision",
+                            PrecioCompra = 250m,
+                            PrecioVenta = 750m,
+                            ProveedorId = 1,
+                            Sku = "sdt-2333",
+                            Stock = 100
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Activo = true,
+                            CategoriaId = 3,
+                            CodigoBarras = "254324378",
+                            Descripcion = "Horquilla inferior trasera de fiat 100",
+                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6366),
+                            Marca = "Autozone",
+                            Modelo = "horin1243254",
+                            Nombre = "Horquilla inferior",
+                            PrecioCompra = 344m,
+                            PrecioVenta = 1200m,
+                            ProveedorId = 1,
+                            Sku = "hit-37698",
+                            Stock = 100
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Activo = true,
+                            CategoriaId = 5,
+                            CodigoBarras = "38748543",
+                            Descripcion = "Piston eleveador trasero",
+                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6370),
+                            Marca = "Diviro",
+                            Modelo = "piset567",
+                            Nombre = "Piston elevador trasero",
+                            PrecioCompra = 12500m,
+                            PrecioVenta = 23400m,
+                            ProveedorId = 2,
+                            Sku = "pet-32434",
+                            Stock = 100
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Activo = true,
+                            CategoriaId = 5,
+                            CodigoBarras = "56765643",
+                            Descripcion = "Linea del hidarulico",
+                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6374),
+                            Marca = "Diviro",
+                            Modelo = "lihid213",
+                            Nombre = "Linea de hidarulico",
+                            PrecioCompra = 1255m,
+                            PrecioVenta = 20300m,
+                            ProveedorId = 2,
+                            Sku = "lh-3435",
+                            Stock = 100
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Activo = false,
+                            CategoriaId = 5,
+                            CodigoBarras = "325783",
+                            Descripcion = "Rin de fibra de carbono de 14 pulgadas",
+                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6378),
+                            Marca = "Daguza",
+                            Modelo = "Rifi69",
+                            Nombre = "Rin 14 pulgadas",
+                            PrecioCompra = 1230m,
+                            PrecioVenta = 2500m,
+                            ProveedorId = 3,
+                            Sku = "",
+                            Stock = 100
+                        });
                 });
 
             modelBuilder.Entity("maverickApi.Models.Proveedor", b =>
@@ -276,6 +434,41 @@ namespace MaverickApi.Migrations
                         .IsUnique();
 
                     b.ToTable("Proveedores");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Activo = true,
+                            Direccion = "Col Miguel Hidalgo, Ciudad de Mexico.",
+                            Email = "autozone@autozone.com",
+                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 934, DateTimeKind.Utc).AddTicks(5993),
+                            Nombre = "Autozone SA de CV",
+                            Rfc = "A12345678",
+                            Telefono = "5506667812"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Activo = true,
+                            Direccion = "Blvd Benjamin Hill Culiacan Sin.",
+                            Email = "diviro@hotmail.com",
+                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 934, DateTimeKind.Utc).AddTicks(6624),
+                            Nombre = "Hidraulica Diviro SA de CV",
+                            Rfc = "H1234567890",
+                            Telefono = "6671020304"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Activo = false,
+                            Direccion = "Blvd Enrique Cabrera Culiacan Sin.",
+                            Email = "daguza@hotmail.com",
+                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 934, DateTimeKind.Utc).AddTicks(6628),
+                            Nombre = "Mantenimientos y Servicios Daguza SA de CV",
+                            Rfc = "D12345",
+                            Telefono = "6673121914"
+                        });
                 });
 
             modelBuilder.Entity("maverickApi.Models.Usuario", b =>
@@ -322,9 +515,20 @@ namespace MaverickApi.Migrations
                             Admin = true,
                             Apellidos = "Sistema",
                             Email = "admin@maverick.com",
-                            FechaCreacion = new DateTime(2026, 4, 22, 3, 47, 58, 549, DateTimeKind.Utc).AddTicks(3129),
+                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 724, DateTimeKind.Utc).AddTicks(2823),
                             Nombre = "Admin",
-                            PasswordHash = "$2a$11$i8MEu/b1uW4nyukDmPdEEuuaBzu1pT9RqA.jbsPZb/Qvi/zYV357K"
+                            PasswordHash = "$2a$11$uWf0Qhi.4ZZGD89wxTDWxeFJrC5syhrqwUZ5ehT/LUyXK/cWJEGsC"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Activo = true,
+                            Admin = false,
+                            Apellidos = "Sistema",
+                            Email = "ventasr@maverick.com",
+                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 932, DateTimeKind.Utc).AddTicks(3387),
+                            Nombre = "Ventas",
+                            PasswordHash = "$2a$11$bkBzIRjeYK4VbNtoJdqKFOJcyiAIgppbF71iH9ipgjX5J8VXqNuf2"
                         });
                 });
 

@@ -64,6 +64,7 @@ builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IVentaService, VentaService>();
+builder.Services.AddScoped<IOrdenCompraService, OrdenCompraService>();
 
 var app = builder.Build();
 

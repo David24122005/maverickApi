@@ -36,7 +36,7 @@ namespace maverickApi.Data
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123"),
                 Admin = true,
                 Activo = true,
-                FechaCreacion = DateTime.UtcNow
+                FechaCreacion = DateTime.Now
             },
             new Usuario
             {
@@ -47,7 +47,7 @@ namespace maverickApi.Data
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("Ventas123"),
                 Admin = false,
                 Activo = true,
-                FechaCreacion = DateTime.UtcNow
+                FechaCreacion = DateTime.Now
             });
 
 
@@ -106,7 +106,7 @@ namespace maverickApi.Data
                     Rfc = "A12345678",
                     Activo = true,
                     Productos = new List<Producto>(),
-                    FechaCreacion = DateTime.UtcNow
+                    FechaCreacion = DateTime.Now
 
                 },
                 new Proveedor
@@ -119,7 +119,7 @@ namespace maverickApi.Data
                     Rfc = "H1234567890",
                     Activo = true,
                     Productos = new List<Producto>(),
-                    FechaCreacion = DateTime.UtcNow
+                    FechaCreacion = DateTime.Now
 
                 },
                 new Proveedor
@@ -132,7 +132,7 @@ namespace maverickApi.Data
                     Rfc = "D12345",
                     Activo = false,
                     Productos = new List<Producto>(),
-                    FechaCreacion = DateTime.UtcNow
+                    FechaCreacion = DateTime.Now
 
                 });
             // //Insertar productos
@@ -152,7 +152,7 @@ namespace maverickApi.Data
                     CategoriaId = 1,
                     ProveedorId = 1,
                     Activo = true,
-                    FechaCreacion = DateTime.UtcNow
+                    FechaCreacion = DateTime.Now
 
                 },
                 new Producto
@@ -170,7 +170,7 @@ namespace maverickApi.Data
                     CategoriaId = 2,
                     ProveedorId = 1,
                     Activo = true,
-                    FechaCreacion = DateTime.UtcNow
+                    FechaCreacion = DateTime.Now
 
                 },
                 new Producto
@@ -188,7 +188,7 @@ namespace maverickApi.Data
                     CategoriaId = 3,
                     ProveedorId = 1,
                     Activo = true,
-                    FechaCreacion = DateTime.UtcNow
+                    FechaCreacion = DateTime.Now
 
                 },
                 new Producto
@@ -206,7 +206,7 @@ namespace maverickApi.Data
                     CategoriaId = 5,
                     ProveedorId = 2,
                     Activo = true,
-                    FechaCreacion = DateTime.UtcNow
+                    FechaCreacion = DateTime.Now
 
                 },
                 new Producto
@@ -224,7 +224,7 @@ namespace maverickApi.Data
                     CategoriaId = 5,
                     ProveedorId = 2,
                     Activo = true,
-                    FechaCreacion = DateTime.UtcNow
+                    FechaCreacion = DateTime.Now
 
                 },
                 new Producto
@@ -242,7 +242,7 @@ namespace maverickApi.Data
                     CategoriaId = 5,
                     ProveedorId = 3,
                     Activo = false,
-                    FechaCreacion = DateTime.UtcNow
+                    FechaCreacion = DateTime.Now
 
                 }
             );
@@ -310,25 +310,25 @@ namespace maverickApi.Data
             // ===== ORDEN COMPRA =====
 
             modelBuilder.Entity<OrdenCompra>()
-                .HasOne<Proveedor>()
+                .HasOne(oc => oc.Proveedor)
                 .WithMany()
                 .HasForeignKey(oc => oc.ProveedorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OrdenCompra>()
-                .HasOne<Usuario>()
+                .HasOne(oc => oc.Usuario)
                 .WithMany()
                 .HasForeignKey(oc => oc.UsuarioId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<DetalleOrdenCompra>()
-                .HasOne<OrdenCompra>()
-                .WithMany()
+                .HasOne(d => d.OrdenCompra)
+                .WithMany(doc => doc.Detalles)
                 .HasForeignKey(doc => doc.OrdenCompraId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DetalleOrdenCompra>()
-                .HasOne<Producto>()
+                .HasOne(d => d.Producto)
                 .WithMany()
                 .HasForeignKey(doc => doc.ProductoId)
                 .OnDelete(DeleteBehavior.Restrict);

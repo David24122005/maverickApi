@@ -6,9 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace maverickApi.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [Authorize(Policy = "AdminOnly")]
+
     public class ProveedorController : ControllerBase
     {
         private readonly IProveedorService _iProveedorService;

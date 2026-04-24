@@ -158,12 +158,13 @@ namespace MaverickApi.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     NumeroCompra = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Total = table.Column<decimal>(type: "decimal(18,4)", nullable: false),
                     ProveedorId = table.Column<int>(type: "int", nullable: false),
                     UsuarioId = table.Column<int>(type: "int", nullable: false),
-                    Fecha = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    FechaEntrega = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     Estado = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Fecha = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    FechaEntrega = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -227,8 +228,8 @@ namespace MaverickApi.Migrations
                     OrdenCompraId = table.Column<int>(type: "int", nullable: false),
                     ProductoId = table.Column<int>(type: "int", nullable: false),
                     Cantidad = table.Column<int>(type: "int", nullable: false),
-                    PrecioUnitario = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Total = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PrecioUnitario = table.Column<decimal>(type: "decimal(18,4)", nullable: false),
+                    Total = table.Column<decimal>(type: "decimal(18,4)", nullable: false),
                     FechaCreacion = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
@@ -297,8 +298,8 @@ namespace MaverickApi.Migrations
                 columns: new[] { "Id", "Activo", "Email", "FechaCreacion", "Nombre", "Rfc", "Telefono" },
                 values: new object[,]
                 {
-                    { 1, true, "hiro@hotmail.com", new DateTime(2026, 4, 22, 8, 53, 6, 936, DateTimeKind.Local).AddTicks(1348), "Taller el giro", "24sa12e", "456734" },
-                    { 2, true, "furro@gmail.com", new DateTime(2026, 4, 22, 8, 53, 6, 938, DateTimeKind.Local).AddTicks(6232), "Cristian Peña", "c3273278j", "5673245" }
+                    { 1, true, "hiro@hotmail.com", new DateTime(2026, 4, 23, 20, 26, 43, 876, DateTimeKind.Local).AddTicks(1722), "Taller el giro", "24sa12e", "456734" },
+                    { 2, true, "michael@gmail.com", new DateTime(2026, 4, 23, 20, 26, 43, 876, DateTimeKind.Local).AddTicks(2063), "Michael Jackson", "345s32r", "56732245" }
                 });
 
             migrationBuilder.InsertData(
@@ -306,9 +307,9 @@ namespace MaverickApi.Migrations
                 columns: new[] { "Id", "Activo", "Direccion", "Email", "FechaCreacion", "Nombre", "Rfc", "Telefono" },
                 values: new object[,]
                 {
-                    { 1, true, "Col Miguel Hidalgo, Ciudad de Mexico.", "autozone@autozone.com", new DateTime(2026, 4, 22, 15, 53, 6, 934, DateTimeKind.Utc).AddTicks(5993), "Autozone SA de CV", "A12345678", "5506667812" },
-                    { 2, true, "Blvd Benjamin Hill Culiacan Sin.", "diviro@hotmail.com", new DateTime(2026, 4, 22, 15, 53, 6, 934, DateTimeKind.Utc).AddTicks(6624), "Hidraulica Diviro SA de CV", "H1234567890", "6671020304" },
-                    { 3, false, "Blvd Enrique Cabrera Culiacan Sin.", "daguza@hotmail.com", new DateTime(2026, 4, 22, 15, 53, 6, 934, DateTimeKind.Utc).AddTicks(6628), "Mantenimientos y Servicios Daguza SA de CV", "D12345", "6673121914" }
+                    { 1, true, "Col Miguel Hidalgo, Ciudad de Mexico.", "autozone@autozone.com", new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(3269), "Autozone SA de CV", "A12345678", "5506667812" },
+                    { 2, true, "Blvd Benjamin Hill Culiacan Sin.", "diviro@hotmail.com", new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(3624), "Hidraulica Diviro SA de CV", "H1234567890", "6671020304" },
+                    { 3, false, "Blvd Enrique Cabrera Culiacan Sin.", "daguza@hotmail.com", new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(3627), "Mantenimientos y Servicios Daguza SA de CV", "D12345", "6673121914" }
                 });
 
             migrationBuilder.InsertData(
@@ -316,8 +317,8 @@ namespace MaverickApi.Migrations
                 columns: new[] { "Id", "Activo", "Admin", "Apellidos", "Email", "FechaCreacion", "Nombre", "PasswordHash" },
                 values: new object[,]
                 {
-                    { 1, true, true, "Sistema", "admin@maverick.com", new DateTime(2026, 4, 22, 15, 53, 6, 724, DateTimeKind.Utc).AddTicks(2823), "Admin", "$2a$11$uWf0Qhi.4ZZGD89wxTDWxeFJrC5syhrqwUZ5ehT/LUyXK/cWJEGsC" },
-                    { 2, true, false, "Sistema", "ventasr@maverick.com", new DateTime(2026, 4, 22, 15, 53, 6, 932, DateTimeKind.Utc).AddTicks(3387), "Ventas", "$2a$11$bkBzIRjeYK4VbNtoJdqKFOJcyiAIgppbF71iH9ipgjX5J8VXqNuf2" }
+                    { 1, true, true, "Sistema", "admin@maverick.com", new DateTime(2026, 4, 23, 20, 26, 43, 751, DateTimeKind.Local).AddTicks(693), "Admin", "$2a$11$I784CJCFbvsdRP3Jn5dTNe.zDztv0NMsVDsvZT9tvFyS.3Y4xeh82" },
+                    { 2, true, false, "Sistema", "ventasr@maverick.com", new DateTime(2026, 4, 23, 20, 26, 43, 874, DateTimeKind.Local).AddTicks(19), "Ventas", "$2a$11$74MdMGfC6II8joEGA6MVfO4Oz5pCNjKJUU4.AVZzeGnR5I.VVKYoe" }
                 });
 
             migrationBuilder.InsertData(
@@ -325,12 +326,12 @@ namespace MaverickApi.Migrations
                 columns: new[] { "Id", "Activo", "CategoriaId", "CodigoBarras", "Descripcion", "FechaCreacion", "Marca", "Modelo", "Nombre", "PrecioCompra", "PrecioVenta", "ProveedorId", "Sku", "Stock" },
                 values: new object[,]
                 {
-                    { 1, true, 1, "1086543", "Banda de motor de 10 pulgadas.", new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(5661), "Autozone", "hrmg1224", "Banda 10 pulgadas", 450m, 905m, 1, "bnd-1234", 100 },
-                    { 2, true, 2, "85728750", "Soporte de transmision para Toyota Corolla 2000 - 2013 ", new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6321), "Autozone", "sop3456", "Soporte de transmision", 250m, 750m, 1, "sdt-2333", 100 },
-                    { 3, true, 3, "254324378", "Horquilla inferior trasera de fiat 100", new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6366), "Autozone", "horin1243254", "Horquilla inferior", 344m, 1200m, 1, "hit-37698", 100 },
-                    { 4, true, 5, "38748543", "Piston eleveador trasero", new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6370), "Diviro", "piset567", "Piston elevador trasero", 12500m, 23400m, 2, "pet-32434", 100 },
-                    { 5, true, 5, "56765643", "Linea del hidarulico", new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6374), "Diviro", "lihid213", "Linea de hidarulico", 1255m, 20300m, 2, "lh-3435", 100 },
-                    { 6, false, 5, "325783", "Rin de fibra de carbono de 14 pulgadas", new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6378), "Daguza", "Rifi69", "Rin 14 pulgadas", 1230m, 2500m, 3, "", 100 }
+                    { 1, true, 1, "1086543", "Banda de motor de 10 pulgadas.", new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(8700), "Autozone", "hrmg1224", "Banda 10 pulgadas", 450m, 905m, 1, "bnd-1234", 100 },
+                    { 2, true, 2, "85728750", "Soporte de transmision para Toyota Corolla 2000 - 2013 ", new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(9062), "Autozone", "sop3456", "Soporte de transmision", 250m, 750m, 1, "sdt-2333", 100 },
+                    { 3, true, 3, "254324378", "Horquilla inferior trasera de fiat 100", new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(9066), "Autozone", "horin1243254", "Horquilla inferior", 344m, 1200m, 1, "hit-37698", 100 },
+                    { 4, true, 5, "38748543", "Piston eleveador trasero", new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(9068), "Diviro", "piset567", "Piston elevador trasero", 12500m, 23400m, 2, "pet-32434", 100 },
+                    { 5, true, 5, "56765643", "Linea del hidarulico", new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(9071), "Diviro", "lihid213", "Linea de hidarulico", 1255m, 20300m, 2, "lh-3435", 100 },
+                    { 6, false, 5, "325783", "Rin de fibra de carbono de 14 pulgadas", new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(9073), "Daguza", "Rifi69", "Rin 14 pulgadas", 1230m, 2500m, 3, "", 100 }
                 });
 
             migrationBuilder.CreateIndex(

@@ -12,7 +12,7 @@ namespace maverickApi.Models
         public string? Email { get; set; }
         public bool Admin { get; set; } = false;
         public string? PasswordHash { get; set; }
-        public bool Activo {get;set;} = true;
-        public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
+        public bool Activo { get; set; } = true;
+        public DateTime FechaCreacion { get; set; } = DateTime.Now;
     }
 }

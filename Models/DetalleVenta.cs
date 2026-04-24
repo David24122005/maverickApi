@@ -15,6 +15,6 @@ namespace maverickApi.Models
         public decimal PrecioUnitario { get; set; }
         [Column(TypeName = "decimal(18,2)")]
         public decimal Subtotal { get; set; }
-        public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
+        public DateTime FechaCreacion { get; set; } = DateTime.Now;
     }
 }

@@ -21,7 +21,7 @@ namespace maverickApi.Models
         [Column(TypeName = "decimal(18,4)")]
         public decimal Total { get; set; }
         public decimal Descuento { get; set; } = 0;
-        public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
+        public DateTime FechaCreacion { get; set; } = DateTime.Now;
         public ICollection<DetalleVenta>? Detalles { get; set; }
 
     }

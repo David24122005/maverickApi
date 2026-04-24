@@ -39,10 +39,12 @@ namespace maverickApi.Services
                 var usuario = await _dbContext.Usuarios.FirstOrDefaultAsync(u => u.Id == usuarioId);
                 if (usuario == null)
                 {
+                    await tx.RollbackAsync();
+
                     return new RespuestaApi<Venta>
                     {
                         Exito = false,
-                        Mensaje = "El usuario se autentico incorrectamente, reinicia la aplicacion.",
+                        Mensaje = "El usuario no existe, reinicia la app.",
                         Datos = null
                     };
                 }
@@ -50,6 +52,8 @@ namespace maverickApi.Services
                 var cliente = await _dbContext.Clientes.FirstOrDefaultAsync(c => c.Id == venta.ClienteId);
                 if (cliente == null)
                 {
+                    await tx.RollbackAsync();
+
                     return new RespuestaApi<Venta>
                     {
                         Exito = false,
@@ -78,6 +82,7 @@ namespace maverickApi.Services
                     .FirstOrDefaultAsync();
                     if (producto == null)
                     {
+                        await tx.RollbackAsync();
                         return new RespuestaApi<Venta>
                         {
                             Exito = false,
@@ -179,6 +184,7 @@ namespace maverickApi.Services
             .Where(v => v.NumeroVenta.StartsWith($"001-{fechaHoy}"))
             .OrderByDescending(v => v.NumeroVenta)
             .FirstOrDefaultAsync();
+
             if (ultimaVenta == null)
             {
                 return 1;

@@ -112,7 +112,7 @@ namespace MaverickApi.Migrations
                             Id = 1,
                             Activo = true,
                             Email = "hiro@hotmail.com",
-                            FechaCreacion = new DateTime(2026, 4, 22, 8, 53, 6, 936, DateTimeKind.Local).AddTicks(1348),
+                            FechaCreacion = new DateTime(2026, 4, 23, 20, 26, 43, 876, DateTimeKind.Local).AddTicks(1722),
                             Nombre = "Taller el giro",
                             Rfc = "24sa12e",
                             Telefono = "456734"
@@ -121,11 +121,11 @@ namespace MaverickApi.Migrations
                         {
                             Id = 2,
                             Activo = true,
-                            Email = "furro@gmail.com",
-                            FechaCreacion = new DateTime(2026, 4, 22, 8, 53, 6, 938, DateTimeKind.Local).AddTicks(6232),
-                            Nombre = "Cristian Peña",
-                            Rfc = "c3273278j",
-                            Telefono = "5673245"
+                            Email = "michael@gmail.com",
+                            FechaCreacion = new DateTime(2026, 4, 23, 20, 26, 43, 876, DateTimeKind.Local).AddTicks(2063),
+                            Nombre = "Michael Jackson",
+                            Rfc = "345s32r",
+                            Telefono = "56732245"
                         });
                 });
 
@@ -147,13 +147,13 @@ namespace MaverickApi.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("PrecioUnitario")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int>("ProductoId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Total")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.HasKey("Id");
 
@@ -221,6 +221,9 @@ namespace MaverickApi.Migrations
 
                     b.Property<int>("ProveedorId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("int");
@@ -302,7 +305,7 @@ namespace MaverickApi.Migrations
                             CategoriaId = 1,
                             CodigoBarras = "1086543",
                             Descripcion = "Banda de motor de 10 pulgadas.",
-                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(5661),
+                            FechaCreacion = new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(8700),
                             Marca = "Autozone",
                             Modelo = "hrmg1224",
                             Nombre = "Banda 10 pulgadas",
@@ -319,7 +322,7 @@ namespace MaverickApi.Migrations
                             CategoriaId = 2,
                             CodigoBarras = "85728750",
                             Descripcion = "Soporte de transmision para Toyota Corolla 2000 - 2013 ",
-                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6321),
+                            FechaCreacion = new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(9062),
                             Marca = "Autozone",
                             Modelo = "sop3456",
                             Nombre = "Soporte de transmision",
@@ -336,7 +339,7 @@ namespace MaverickApi.Migrations
                             CategoriaId = 3,
                             CodigoBarras = "254324378",
                             Descripcion = "Horquilla inferior trasera de fiat 100",
-                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6366),
+                            FechaCreacion = new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(9066),
                             Marca = "Autozone",
                             Modelo = "horin1243254",
                             Nombre = "Horquilla inferior",
@@ -353,7 +356,7 @@ namespace MaverickApi.Migrations
                             CategoriaId = 5,
                             CodigoBarras = "38748543",
                             Descripcion = "Piston eleveador trasero",
-                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6370),
+                            FechaCreacion = new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(9068),
                             Marca = "Diviro",
                             Modelo = "piset567",
                             Nombre = "Piston elevador trasero",
@@ -370,7 +373,7 @@ namespace MaverickApi.Migrations
                             CategoriaId = 5,
                             CodigoBarras = "56765643",
                             Descripcion = "Linea del hidarulico",
-                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6374),
+                            FechaCreacion = new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(9071),
                             Marca = "Diviro",
                             Modelo = "lihid213",
                             Nombre = "Linea de hidarulico",
@@ -387,7 +390,7 @@ namespace MaverickApi.Migrations
                             CategoriaId = 5,
                             CodigoBarras = "325783",
                             Descripcion = "Rin de fibra de carbono de 14 pulgadas",
-                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 935, DateTimeKind.Utc).AddTicks(6378),
+                            FechaCreacion = new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(9073),
                             Marca = "Daguza",
                             Modelo = "Rifi69",
                             Nombre = "Rin 14 pulgadas",
@@ -442,7 +445,7 @@ namespace MaverickApi.Migrations
                             Activo = true,
                             Direccion = "Col Miguel Hidalgo, Ciudad de Mexico.",
                             Email = "autozone@autozone.com",
-                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 934, DateTimeKind.Utc).AddTicks(5993),
+                            FechaCreacion = new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(3269),
                             Nombre = "Autozone SA de CV",
                             Rfc = "A12345678",
                             Telefono = "5506667812"
@@ -453,7 +456,7 @@ namespace MaverickApi.Migrations
                             Activo = true,
                             Direccion = "Blvd Benjamin Hill Culiacan Sin.",
                             Email = "diviro@hotmail.com",
-                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 934, DateTimeKind.Utc).AddTicks(6624),
+                            FechaCreacion = new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(3624),
                             Nombre = "Hidraulica Diviro SA de CV",
                             Rfc = "H1234567890",
                             Telefono = "6671020304"
@@ -464,7 +467,7 @@ namespace MaverickApi.Migrations
                             Activo = false,
                             Direccion = "Blvd Enrique Cabrera Culiacan Sin.",
                             Email = "daguza@hotmail.com",
-                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 934, DateTimeKind.Utc).AddTicks(6628),
+                            FechaCreacion = new DateTime(2026, 4, 23, 20, 26, 43, 875, DateTimeKind.Local).AddTicks(3627),
                             Nombre = "Mantenimientos y Servicios Daguza SA de CV",
                             Rfc = "D12345",
                             Telefono = "6673121914"
@@ -515,9 +518,9 @@ namespace MaverickApi.Migrations
                             Admin = true,
                             Apellidos = "Sistema",
                             Email = "admin@maverick.com",
-                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 724, DateTimeKind.Utc).AddTicks(2823),
+                            FechaCreacion = new DateTime(2026, 4, 23, 20, 26, 43, 751, DateTimeKind.Local).AddTicks(693),
                             Nombre = "Admin",
-                            PasswordHash = "$2a$11$uWf0Qhi.4ZZGD89wxTDWxeFJrC5syhrqwUZ5ehT/LUyXK/cWJEGsC"
+                            PasswordHash = "$2a$11$I784CJCFbvsdRP3Jn5dTNe.zDztv0NMsVDsvZT9tvFyS.3Y4xeh82"
                         },
                         new
                         {
@@ -526,9 +529,9 @@ namespace MaverickApi.Migrations
                             Admin = false,
                             Apellidos = "Sistema",
                             Email = "ventasr@maverick.com",
-                            FechaCreacion = new DateTime(2026, 4, 22, 15, 53, 6, 932, DateTimeKind.Utc).AddTicks(3387),
+                            FechaCreacion = new DateTime(2026, 4, 23, 20, 26, 43, 874, DateTimeKind.Local).AddTicks(19),
                             Nombre = "Ventas",
-                            PasswordHash = "$2a$11$bkBzIRjeYK4VbNtoJdqKFOJcyiAIgppbF71iH9ipgjX5J8VXqNuf2"
+                            PasswordHash = "$2a$11$74MdMGfC6II8joEGA6MVfO4Oz5pCNjKJUU4.AVZzeGnR5I.VVKYoe"
                         });
                 });
 
@@ -578,17 +581,21 @@ namespace MaverickApi.Migrations
 
             modelBuilder.Entity("maverickApi.Models.DetalleOrdenCompra", b =>
                 {
-                    b.HasOne("maverickApi.Models.OrdenCompra", null)
-                        .WithMany()
+                    b.HasOne("maverickApi.Models.OrdenCompra", "OrdenCompra")
+                        .WithMany("Detalles")
                         .HasForeignKey("OrdenCompraId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("maverickApi.Models.Producto", null)
+                    b.HasOne("maverickApi.Models.Producto", "Producto")
                         .WithMany()
                         .HasForeignKey("ProductoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("OrdenCompra");
+
+                    b.Navigation("Producto");
                 });
 
             modelBuilder.Entity("maverickApi.Models.DetalleVenta", b =>
@@ -612,17 +619,21 @@ namespace MaverickApi.Migrations
 
             modelBuilder.Entity("maverickApi.Models.OrdenCompra", b =>
                 {
-                    b.HasOne("maverickApi.Models.Proveedor", null)
+                    b.HasOne("maverickApi.Models.Proveedor", "Proveedor")
                         .WithMany()
                         .HasForeignKey("ProveedorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("maverickApi.Models.Usuario", null)
+                    b.HasOne("maverickApi.Models.Usuario", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Proveedor");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("maverickApi.Models.Producto", b =>
@@ -664,6 +675,11 @@ namespace MaverickApi.Migrations
             modelBuilder.Entity("maverickApi.Models.Categoria", b =>
                 {
                     b.Navigation("Productos");
+                });
+
+            modelBuilder.Entity("maverickApi.Models.OrdenCompra", b =>
+                {
+                    b.Navigation("Detalles");
                 });
 
             modelBuilder.Entity("maverickApi.Models.Proveedor", b =>

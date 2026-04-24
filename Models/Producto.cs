@@ -24,6 +24,6 @@ namespace maverickApi.Models
         public int? ProveedorId { get; set; }
         public Proveedor? Proveedor { get; set; }
         public bool Activo { get; set; } = true;
-        public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
+        public DateTime FechaCreacion { get; set; } = DateTime.Now;
     }
 }

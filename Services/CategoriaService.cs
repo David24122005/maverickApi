@@ -9,10 +9,12 @@ namespace maverickApi.Services
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IConfiguration _configuration;
-        public CategoriaService(ApplicationDbContext DbContext, IConfiguration Configuration)
+        private readonly ILogger<CategoriaService> _logger;
+        public CategoriaService(ApplicationDbContext DbContext, IConfiguration Configuration, ILogger<CategoriaService> logger)
         {
             _dbContext = DbContext;
             _configuration = Configuration;
+            _logger = logger;
         }
 
         public async Task<RespuestaApi<Categoria>> CrearCategoriaAsync(Categoria categoria)
@@ -24,6 +26,7 @@ namespace maverickApi.Services
                 if (string.IsNullOrWhiteSpace(categoria.Nombre) || string.IsNullOrWhiteSpace(categoria.Descripcion))
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("No debe de haber campos vacios en la categoria.");
                     return new RespuestaApi<Categoria>
                     {
                         Exito = false,
@@ -35,6 +38,7 @@ namespace maverickApi.Services
                 if (categoriaExiste)
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("El nombre: {Nombre} de categoria ya existe.", categoria.Nombre);
                     return new RespuestaApi<Categoria>
                     {
                         Exito = false,
@@ -46,6 +50,7 @@ namespace maverickApi.Services
                 _dbContext.Categorias.Add(categoria);
                 await _dbContext.SaveChangesAsync();
                 await tx.CommitAsync();
+                _logger.LogInformation("La categoria con nombre: {Nombre} se creo correctamente.", categoria.Nombre);
 
                 return new RespuestaApi<Categoria>
                 {
@@ -54,9 +59,10 @@ namespace maverickApi.Services
                     Datos = categoria
                 };
             }
-            catch
+            catch (Exception ex)
             {
                 await tx.RollbackAsync();
+                _logger.LogError(ex, "Error al crear la categoria.");
                 return new RespuestaApi<Categoria>
                 {
                     Exito = false,
@@ -72,6 +78,7 @@ namespace maverickApi.Services
                 var categorias = await _dbContext.Categorias.ToListAsync();
                 if (categorias == null || categorias.Count() == 0)
                 {
+                    _logger.LogWarning("No se encontraron categorias en la base de datos.");
                     return new RespuestaApi<List<Categoria>>
                     {
 
@@ -80,6 +87,7 @@ namespace maverickApi.Services
                         Datos = null
                     };
                 }
+                _logger.LogInformation("Se encontraron {Count} cantidad de categorias.", categorias.Count());
                 return new RespuestaApi<List<Categoria>>
                 {
                     Exito = true,
@@ -87,8 +95,9 @@ namespace maverickApi.Services
                     Datos = categorias
                 };
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error al obtener categorias.");
                 return new RespuestaApi<List<Categoria>>
                 {
                     Exito = false,
@@ -103,10 +112,11 @@ namespace maverickApi.Services
             {
                 if (string.IsNullOrWhiteSpace(busqueda))
                 {
+                    _logger.LogWarning("El termino de busqueda ingreso vacio.");
                     return new RespuestaApi<List<Categoria>>
                     {
                         Exito = false,
-                        Mensaje = "La busquedano puede estar vacia",
+                        Mensaje = "La busqueda no puede estar vacia.",
                         Datos = null
                     };
                 }
@@ -120,6 +130,7 @@ namespace maverickApi.Services
 
                 if (categorias.Count == 0 || categorias == null)
                 {
+                    _logger.LogWarning("No se encontraron categorias para el termino de busqueda: {busqueda}", busqueda);
                     return new RespuestaApi<List<Categoria>>
                     {
                         Exito = true,
@@ -127,6 +138,7 @@ namespace maverickApi.Services
                         Datos = null
                     };
                 }
+                _logger.LogInformation("Se obtuvieron las caategorias correctamente.");
                 return new RespuestaApi<List<Categoria>>
                 {
                     Exito = true,
@@ -135,8 +147,9 @@ namespace maverickApi.Services
                 };
 
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error al obtener las categorias con el termino de busqueda: {busqueda}", busqueda);
                 return new RespuestaApi<List<Categoria>>
                 {
                     Exito = false,

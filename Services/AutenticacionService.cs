@@ -18,15 +18,18 @@ namespace maverickApi.Services
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IConfiguration _configuration;
-        public AutenticacionService(ApplicationDbContext DbContext, IConfiguration Configuration)
+        private readonly ILogger<AutenticacionService> _logger;
+        public AutenticacionService(ApplicationDbContext DbContext, IConfiguration Configuration, ILogger<AutenticacionService> logger)
         {
             _dbContext = DbContext;
             _configuration = Configuration;
+            _logger = logger;
         }
         public async Task<RespuestaApi<AutenticacionRespuesta>> IniciarSesionAsync(Autenticacion autenticacion)
         {
             if (string.IsNullOrWhiteSpace(autenticacion.Email))
             {
+                _logger.LogWarning("El correo no debe estar vacio");
                 return new RespuestaApi<AutenticacionRespuesta>
                 {
                     Exito = false,
@@ -37,15 +40,19 @@ namespace maverickApi.Services
 
             var usuario = await _dbContext.Usuarios.FirstOrDefaultAsync(u => u.Email == autenticacion.Email.ToString());
             if (usuario == null)
+            {
+                _logger.LogWarning("No se encontro algun usuario que corresponda al email: {Email}", autenticacion.Email);
                 return new RespuestaApi<AutenticacionRespuesta>
                 {
                     Exito = false,
                     Mensaje = "Usuario o contraseña incorrectos.",
                     Datos = null
                 };
+            }
 
             if (!usuario.Activo)
             {
+                _logger.LogWarning("El usuario: {Nombre} se dio de baja anteriormente.", usuario.Nombre);
                 return new RespuestaApi<AutenticacionRespuesta>
                 {
                     Exito = false,
@@ -58,6 +65,7 @@ namespace maverickApi.Services
 
             if (!passwordValida)
             {
+                _logger.LogWarning("La contraseña es incorrecta.");
                 return new RespuestaApi<AutenticacionRespuesta>
                 {
                     Exito = false,
@@ -69,6 +77,7 @@ namespace maverickApi.Services
             var token = GenerateJwtToken(usuario);
             usuario.PasswordHash = "";
 
+            _logger.LogInformation("El usuario: {Nombre} se autentico correctamente.", usuario.Nombre);
             return new RespuestaApi<AutenticacionRespuesta>
             {
                 Exito = true,
@@ -105,6 +114,7 @@ namespace maverickApi.Services
                     expires: DateTime.Now.AddMinutes(expireMinutes),
                     signingCredentials: credentials
                 );
+            _logger.LogInformation("Un nuevo token se genero correctamente.");
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

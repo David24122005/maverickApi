@@ -16,23 +16,24 @@ namespace maverickApi.Services
         private readonly ApplicationDbContext _dbContext;
         private readonly IConfiguration _Configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public OrdenCompraService(ApplicationDbContext dbContext, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        private readonly ILogger<OrdenCompraService> _logger;
+        public OrdenCompraService(ApplicationDbContext dbContext, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger<OrdenCompraService> logger)
         {
             _dbContext = dbContext;
             _Configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
         public async Task<RespuestaApi<OrdenCompra>> CrearOrdenCompraAsync(OrdenCompra ordenCompra)
         {
             using var tx = await _dbContext.Database.BeginTransactionAsync();
-
             try
             {
-                if (ordenCompra.ProveedorId < 0)
+                if (ordenCompra.ProveedorId < 0 || ordenCompra.Detalles.Count() == 0)
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("Validacion fallida al crear orden de compra. Faltan campos obligatorios. Id de proveedor: {Id}, catidad de detalles: {Detalles}.", ordenCompra.ProveedorId, ordenCompra.Detalles?.Count() ?? 0);
                     return new RespuestaApi<OrdenCompra>
                     {
                         Exito = false,
@@ -41,11 +42,12 @@ namespace maverickApi.Services
                     };
                 }
                 var user = _httpContextAccessor.HttpContext?.User;
-                var usuarioId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? user.FindFirst("sub")?.Value ?? "0");
+                var usuarioId = int.Parse(user?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? user?.FindFirst("sub")?.Value ?? "0");
 
                 if (usuarioId == 0)
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("El usuario no se autentico correctamente.");
                     return new RespuestaApi<OrdenCompra>
                     {
                         Exito = false,
@@ -57,6 +59,7 @@ namespace maverickApi.Services
                 if (usuario == null)
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("El usuario con id: {Id} no existe en la base de datos.", usuarioId);
                     return new RespuestaApi<OrdenCompra>
                     {
                         Exito = false,
@@ -65,11 +68,11 @@ namespace maverickApi.Services
                     };
                 }
 
-
                 var proveedor = await _dbContext.Proveedores.FirstOrDefaultAsync(p => p.Id == ordenCompra.ProveedorId);
                 if (proveedor == null)
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("El proveedor con id: {Id} no existe en la base de datos.", ordenCompra.ProveedorId);
                     return new RespuestaApi<OrdenCompra>
                     {
                         Exito = false,
@@ -94,6 +97,7 @@ namespace maverickApi.Services
                     if (producto == null)
                     {
                         await tx.RollbackAsync();
+                        _logger.LogWarning("El producto con id: {Id} no existe en la base de datos o no pertenece al proveedor con id: {Id}.", item.ProductoId, ordenCompra.ProveedorId);
                         return new RespuestaApi<OrdenCompra>
                         {
                             Exito = false,
@@ -121,6 +125,7 @@ namespace maverickApi.Services
                 nuevaOrden.Usuario?.PasswordHash = "";
                 nuevaOrden.Proveedor?.Productos = null;
 
+                _logger.LogInformation("Orden de compra registrada correctamente con id: {Id} con un monto total de {Total} pesos mexicanos.", nuevaOrden.Id, nuevaOrden.Total);
                 return new RespuestaApi<OrdenCompra>
                 {
                     Exito = true,
@@ -131,6 +136,7 @@ namespace maverickApi.Services
             catch (Exception ex)
             {
                 await tx.RollbackAsync();
+                _logger.LogError(ex, "Excepcion al crear la orden de compra.");
                 return new RespuestaApi<OrdenCompra>
                 {
                     Exito = false,
@@ -141,7 +147,6 @@ namespace maverickApi.Services
         }
         public async Task<RespuestaApi<List<OrdenCompra>>> ObtenerOrdenesCompraAsync()
         {
-
             try
             {
                 var ordenes = await _dbContext.OrdenCompras
@@ -152,6 +157,7 @@ namespace maverickApi.Services
                 .ToListAsync();
                 if (ordenes.Count() == 0)
                 {
+                    _logger.LogWarning("No se encontraron ordenes de compra en la base de datos.");
                     return new RespuestaApi<List<OrdenCompra>>
                     {
                         Exito = true,
@@ -162,9 +168,10 @@ namespace maverickApi.Services
                 }
                 foreach (var item in ordenes)
                 {
-                    item.Proveedor.Productos = null;
-                    item.Usuario.PasswordHash = null;
+                    item.Proveedor?.Productos = null;
+                    item.Usuario?.PasswordHash = null;
                 }
+                _logger.LogInformation("Se obtuvieron {Count} ordenes de compra de la base de datos.", ordenes.Count());
                 return new RespuestaApi<List<OrdenCompra>>
                 {
                     Exito = true,
@@ -172,8 +179,9 @@ namespace maverickApi.Services
                     Datos = ordenes
                 };
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Excepcion al obtener ordenes de compras.");
                 return new RespuestaApi<List<OrdenCompra>>
                 {
                     Exito = false,
@@ -195,6 +203,7 @@ namespace maverickApi.Services
                 .FirstOrDefaultAsync(oc => oc.Id == ordenCompraEditar.Id);
                 if (ordenExistente == null)
                 {
+                    _logger.LogWarning("No se encontro la orden de compra con id: {Id}.", ordenCompraEditar.Id);
                     return new RespuestaApi<OrdenCompra>
                     {
                         Exito = false,
@@ -205,6 +214,7 @@ namespace maverickApi.Services
                 if (ordenExistente.Estado == "Recibida" || ordenExistente.Estado == "Cancelada")
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("La orden con id: {Id}, numero de orden: {NumeroCompra} se encuentra con estado: {Estado}", ordenExistente.Id, ordenExistente.NumeroCompra, ordenExistente.Estado);
                     return new RespuestaApi<OrdenCompra>
                     {
                         Exito = false,
@@ -219,6 +229,7 @@ namespace maverickApi.Services
                 if (usuarioId == 0)
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("El usuario no se autentico correctamente.");
                     return new RespuestaApi<OrdenCompra>
                     {
                         Exito = false,
@@ -235,10 +246,11 @@ namespace maverickApi.Services
                     if (nuevoProveedor == null)
                     {
                         await tx.RollbackAsync();
+                        _logger.LogWarning("El proveedor con id: {Id} no existe en la base de datos o esta inactivo.", ordenExistente.ProveedorId);
                         return new RespuestaApi<OrdenCompra>
                         {
                             Exito = false,
-                            Mensaje = "El proveedor especificado no existe.",
+                            Mensaje = "El proveedor especificado no existe o se encuentra inactivo.",
                             Datos = null
                         };
                     }
@@ -254,14 +266,17 @@ namespace maverickApi.Services
                     Decimal nuevoTotal = 0;
                     foreach (var item in ordenCompraEditar.Detalles)
                     {
-                        var producto = await _dbContext.Productos.FirstOrDefaultAsync(p => p.Id == item.ProductoId);
+                        var producto = await _dbContext.Productos
+                        .Where(p => p.Activo)
+                        .FirstOrDefaultAsync(p => p.Id == item.ProductoId);
                         if (producto == null)
                         {
                             await tx.RollbackAsync();
+                            _logger.LogWarning("No se encontro el producto con id: {Id} en la base de datos.", item.ProductoId);
                             return new RespuestaApi<OrdenCompra>
                             {
                                 Exito = false,
-                                Mensaje = "No se encontro algun producto.",
+                                Mensaje = "No se encontro algun producto en la base de datos.",
                                 Datos = null
                             };
                         }
@@ -291,7 +306,7 @@ namespace maverickApi.Services
                 .FirstOrDefaultAsync(oc => oc.Id == ordenExistente.Id);
 
                 ordenActualizada?.Usuario?.PasswordHash = "";
-
+                _logger.LogInformation("La orden con id: {Id} y numero de orden: {NumeroCompra} se actualizo correctamente.", ordenActualizada.Id, ordenActualizada.NumeroCompra);
                 return new RespuestaApi<OrdenCompra>
                 {
                     Exito = true,
@@ -304,6 +319,7 @@ namespace maverickApi.Services
             catch (Exception ex)
             {
                 await tx.RollbackAsync();
+                _logger.LogError(ex, "Excepcion al editar la orden con id: {Id} y numero de orden: {NumeroCompra}.", ordenCompraEditar.Id, ordenCompraEditar.NumeroCompra);
                 return new RespuestaApi<OrdenCompra>
                 {
                     Exito = false,

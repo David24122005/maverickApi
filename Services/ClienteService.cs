@@ -9,10 +9,13 @@ namespace maverickApi.Services
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IConfiguration _configuration;
-        public ClienteService(ApplicationDbContext DbContext, IConfiguration Configuration)
+        private readonly ILogger<ClienteService> _logger;
+        public ClienteService(ApplicationDbContext DbContext, IConfiguration Configuration, ILogger<ClienteService> logger)
+
         {
             _dbContext = DbContext;
             _configuration = Configuration;
+            _logger = logger;
         }
 
         public async Task<RespuestaApi<Cliente>> CrearClienteAsync(Cliente cliente)
@@ -21,6 +24,7 @@ namespace maverickApi.Services
             {
                 if (string.IsNullOrWhiteSpace(cliente.Nombre) || string.IsNullOrWhiteSpace(cliente.Rfc) || string.IsNullOrWhiteSpace(cliente.Telefono) || string.IsNullOrWhiteSpace(cliente.Email))
                 {
+                    _logger.LogWarning("Validación fallida al crear cliente. Faltan campos obligatorios, Rfc recibido: {Rfc}, Nombre recibido: {Nombre}, Telefono recibido: {Telefono} y Email recibido: {Email}.", cliente.Rfc ?? "N/A", cliente.Nombre ?? "N/A", cliente.Telefono ?? "N/A", cliente.Email ?? "N/A");
                     return new RespuestaApi<Cliente>
                     {
                         Exito = false,
@@ -31,6 +35,7 @@ namespace maverickApi.Services
                 var ClienteExiste = await _dbContext.Clientes.AnyAsync(c => c.Rfc == cliente.Rfc);
                 if (ClienteExiste)
                 {
+                    _logger.LogWarning("Intento de registro duplicado. Ya existe un cliente con el Rfc: {Rfc}.", cliente.Rfc);
                     return new RespuestaApi<Cliente>
                     {
                         Exito = false,
@@ -42,6 +47,7 @@ namespace maverickApi.Services
                 _dbContext.Clientes.Add(cliente);
                 await _dbContext.SaveChangesAsync();
 
+                _logger.LogInformation("Cliente registrado exitosamente. Id: {Id} ,Rfc: {Rfc}", cliente.Id, cliente.Rfc);
                 return new RespuestaApi<Cliente>
                 {
                     Exito = true,
@@ -49,8 +55,9 @@ namespace maverickApi.Services
                     Datos = cliente
                 };
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Excepcion al intentar crear al cliente con Rfc: {Rfc}.", cliente.Rfc);
                 return new RespuestaApi<Cliente>
                 {
                     Exito = false,
@@ -64,8 +71,9 @@ namespace maverickApi.Services
             try
             {
                 var clientes = await _dbContext.Clientes.ToListAsync();
-                if (clientes.Count == 0)
+                if (clientes.Count() == 0)
                 {
+                    _logger.LogWarning("No se encontraron clientes en la base de datos.");
                     return new RespuestaApi<List<Cliente>>
                     {
                         Exito = false,
@@ -73,6 +81,7 @@ namespace maverickApi.Services
                         Datos = null
                     };
                 }
+                _logger.LogInformation("Se obtuvieron {Count} clientes de la base de datos.", clientes.Count());
                 return new RespuestaApi<List<Cliente>>
                 {
                     Exito = true,
@@ -80,8 +89,9 @@ namespace maverickApi.Services
                     Datos = clientes
                 };
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Excepcion al obtener los clientes.");
                 return new RespuestaApi<List<Cliente>>
                 {
                     Exito = false,
@@ -96,7 +106,7 @@ namespace maverickApi.Services
             {
                 if (string.IsNullOrWhiteSpace(busqueda))
                 {
-
+                    _logger.LogWarning("El termino de busqueda de clientes se recibio vacio o nulo.");
                     return new RespuestaApi<List<Cliente>>
                     {
                         Exito = false,
@@ -115,6 +125,7 @@ namespace maverickApi.Services
                 ).ToListAsync();
                 if (clientes == null || clientes.Count() == 0)
                 {
+                    _logger.LogInformation("La busqueda de clientes no arrojo resultados para el termino de busqueda: {Busqueda}.", busqueda);
                     return new RespuestaApi<List<Cliente>>
                     {
                         Exito = true,
@@ -122,6 +133,7 @@ namespace maverickApi.Services
                         Datos = null
                     };
                 }
+                _logger.LogInformation("Se encontraron {Count} clientes para el termino de busqueda: {Busqueda}.", clientes.Count(), busqueda);
                 return new RespuestaApi<List<Cliente>>
                 {
                     Exito = true,
@@ -129,8 +141,9 @@ namespace maverickApi.Services
                     Datos = clientes
                 };
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Excepcion al buscar clientes con el termino: {Busqueda},", busqueda);
                 return new RespuestaApi<List<Cliente>>
                 {
                     Exito = false,

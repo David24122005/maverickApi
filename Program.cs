@@ -7,7 +7,6 @@ using maverickApi.Interfaces;
 using System.Text.Json.Serialization;
 using maverickApi.Services;
 using maverickApi.Models;
-using maverick.ClienteService;
 
 var builder = WebApplication.CreateBuilder(args);
 

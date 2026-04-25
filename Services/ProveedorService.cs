@@ -52,12 +52,13 @@ namespace maverickApi.Services
                     Datos = proveedor
                 };
             }
-            catch
+            catch (Exception ex)
             {
                 return new RespuestaApi<Proveedor>
                 {
                     Exito = false,
-                    Mensaje = "Ocurrió un error interno al conectar con la base de datos. Intente más tarde.",
+                    // Mensaje = "Ocurrió un error interno al conectar con la base de datos. Intente más tarde.",
+                    Mensaje = $"error: {ex.Message}",
                     Datos = null
                 };
             }

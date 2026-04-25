@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace maverickApi.Controllers
 {
-    [Route("api/{controller}")]
+    [Route("api/[controller]")]
     [ApiController]
     [Authorize]
     public class VentaController : ControllerBase

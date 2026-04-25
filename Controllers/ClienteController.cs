@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace maverickApi.Controllers
 {
     [ApiController]
-    [Route("api/{controller}")]
-    [Authorize(Policy = "AdminOnly")]
+    [Route("api/[controller]")]
+    [Authorize]
     public class ClienteController : ControllerBase
     {
         private readonly IClienteService _iClienteService;

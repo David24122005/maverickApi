@@ -3,7 +3,7 @@ using maverickApi.Data;
 using maverickApi.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace maverick.ClienteService
+namespace maverickApi.Services
 {
     public class ClienteService : IClienteService
     {
@@ -140,4 +140,4 @@ namespace maverick.ClienteService
             }
         }
     }
-}   
+}

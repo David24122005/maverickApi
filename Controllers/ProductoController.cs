@@ -8,7 +8,8 @@ namespace maverickApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize]
+
     public class ProductoController : ControllerBase
     {
         private readonly IProductoService _iProductoService;

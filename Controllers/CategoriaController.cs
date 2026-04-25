@@ -6,8 +6,8 @@ using maverickApi.Models;
 namespace maverickApi.Controllers
 {
     [ApiController]
-    [Route("api/{controller}")]
-    [Authorize(Policy = "AdminOnly")]
+    [Route("api/[controller]")]
+    [Authorize]
     public class CategoriaController : ControllerBase
     {
         private readonly ICategoriaService _iCategoraService;

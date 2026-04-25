@@ -15,11 +15,13 @@ namespace maverickApi.Services
         private readonly ApplicationDbContext _dbContext;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public ProductoService(ApplicationDbContext DbContext, IConfiguration Configuration, IHttpContextAccessor httpContextAccessor)
+        private readonly ILogger<ProductoService> _logger;
+        public ProductoService(ApplicationDbContext DbContext, IConfiguration Configuration, IHttpContextAccessor httpContextAccessor, ILogger<ProductoService> logger)
         {
             _dbContext = DbContext;
             _configuration = Configuration;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
         public async Task<RespuestaApi<Producto>> CrearProductoAsync(Producto producto)
@@ -31,6 +33,7 @@ namespace maverickApi.Services
                 if (string.IsNullOrWhiteSpace(producto.CodigoBarras) || string.IsNullOrWhiteSpace(producto.Nombre) || string.IsNullOrWhiteSpace(producto.Descripcion) || string.IsNullOrWhiteSpace(producto.Sku) || string.IsNullOrWhiteSpace(producto.Marca) || producto.PrecioCompra <= 0 || producto.PrecioVenta <= 0 || string.IsNullOrWhiteSpace(producto.Modelo) || producto.CategoriaId <= 0 || producto.ProveedorId <= 0)
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("Validación fallida al crear producto: campos obligatorios vacíos o inválidos. Datos recibidos: {@Producto}", producto);
                     return new RespuestaApi<Producto>
                     {
                         Exito = false,
@@ -43,6 +46,7 @@ namespace maverickApi.Services
                 if (SkuExiste)
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("El sku proporcionado existe en otro producto: {sku}", producto.Sku);
                     return new RespuestaApi<Producto>
                     {
                         Exito = false,
@@ -56,6 +60,7 @@ namespace maverickApi.Services
                 if (codigoBarrasExiste)
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("El codigo de barras existe en otro producto: {codigoBarras}", producto.CodigoBarras);
                     return new RespuestaApi<Producto>
                     {
                         Exito = false,
@@ -67,6 +72,7 @@ namespace maverickApi.Services
                 if (proveedor == null)
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("El proveedor con id: {id} no existe", producto.ProveedorId);
                     return new RespuestaApi<Producto>
                     {
                         Exito = false,
@@ -79,6 +85,7 @@ namespace maverickApi.Services
                 if (categoria == null)
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("La categoria con id: {id} no existe.", producto.CategoriaId);
                     return new RespuestaApi<Producto>
                     {
                         Exito = false,
@@ -92,6 +99,8 @@ namespace maverickApi.Services
                 await _dbContext.SaveChangesAsync();
                 await tx.CommitAsync();
 
+
+                _logger.LogInformation("El producto: {Nombre} con el Id: {Id} fue creado exitosamente.", producto.Nombre, producto.Id);
                 return new RespuestaApi<Producto>
                 {
                     Exito = true,
@@ -99,9 +108,10 @@ namespace maverickApi.Services
                     Datos = producto
                 };
             }
-            catch
+            catch (Exception ex)
             {
                 await tx.RollbackAsync();
+                _logger.LogError(ex, "Error al crear el producto");
                 return new RespuestaApi<Producto>
                 {
                     Exito = false,
@@ -122,6 +132,7 @@ namespace maverickApi.Services
 
                 if (productos.Count == 0)
                 {
+                    _logger.LogWarning("No se encontraron productos en la base de datos.");
                     return new RespuestaApi<List<Producto>>
                     {
                         Exito = true,
@@ -131,7 +142,7 @@ namespace maverickApi.Services
                 }
                 productos.ForEach(p => p.Categoria.Productos = null);
                 productos.ForEach(p => p.Proveedor.Productos = null);
-
+                _logger.LogInformation("Se encontraron {Count} cantidad de productos.", productos.Count());
                 return new RespuestaApi<List<Producto>>
                 {
                     Exito = true,
@@ -139,8 +150,9 @@ namespace maverickApi.Services
                     Datos = productos
                 };
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error al obtener los productos.");
                 return new RespuestaApi<List<Producto>>
                 {
                     Exito = false,
@@ -156,6 +168,7 @@ namespace maverickApi.Services
             {
                 if (string.IsNullOrWhiteSpace(busqueda))
                 {
+                    _logger.LogWarning("El campo de busqueda ingreso vacio.");
                     return new RespuestaApi<List<Producto>>
                     {
                         Exito = false,
@@ -182,6 +195,7 @@ namespace maverickApi.Services
 
                 if (productos.Count == 0)
                 {
+                    _logger.LogWarning("No se encontraron productos para la busqueda: {busqueda}", busqueda);
                     return new RespuestaApi<List<Producto>>
                     {
                         Exito = true,
@@ -190,8 +204,8 @@ namespace maverickApi.Services
                     };
                 }
 
-                productos.ForEach(p => p.Categoria = null);
-
+                productos.ForEach(p => p.Categoria.Productos = null);
+                _logger.LogInformation("Se obtuvieron los productos exitosamente.");
                 return new RespuestaApi<List<Producto>>
                 {
                     Exito = true,
@@ -199,8 +213,9 @@ namespace maverickApi.Services
                     Datos = productos
                 };
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error al obtener los producto que coincidan con la busqueda: {busqueda}", busqueda);
                 return new RespuestaApi<List<Producto>>
                 {
                     Exito = false,
@@ -217,6 +232,7 @@ namespace maverickApi.Services
                 var productoExistente = await _dbContext.Productos.FindAsync(editarProductoDto.Id);
                 if (productoExistente == null)
                 {
+                    _logger.LogWarning("No se encontro el producto: {Nombre}.", editarProductoDto.Nombre);
                     return new RespuestaApi<Producto>
                     {
                         Exito = false,
@@ -230,6 +246,7 @@ namespace maverickApi.Services
                     var existeSku = await _dbContext.Productos.AnyAsync(p => p.Sku == skuLimpio && p.Id != editarProductoDto.Id);
                     if (existeSku)
                     {
+                        _logger.LogWarning("El sku: {sku} ya se encuentra registrado en otro producto.", editarProductoDto.Sku);
                         return new RespuestaApi<Producto>
                         {
                             Exito = false,
@@ -245,6 +262,7 @@ namespace maverickApi.Services
 
                     if (categoriaNueva == null)
                     {
+                        _logger.LogWarning("La categoria no existe.");
                         return new RespuestaApi<Producto>
                         {
                             Exito = false,
@@ -260,6 +278,7 @@ namespace maverickApi.Services
                         .FirstOrDefaultAsync(p => p.Id == editarProductoDto.ProveedorId);
                     if (proveedorNuevo == null)
                     {
+                        _logger.LogWarning("El proveedor no existe.");
                         return new RespuestaApi<Producto>
                         {
                             Exito = false,
@@ -272,11 +291,12 @@ namespace maverickApi.Services
                 }
                 if (!string.IsNullOrWhiteSpace(editarProductoDto.CodigoBarras))
                 {
-                    editarProductoDto.CodigoBarras.Replace(" ", "");
+                    editarProductoDto.CodigoBarras = editarProductoDto.CodigoBarras.Replace(" ", "");
                     var codigoBarrasExiste = await _dbContext.Productos
                         .AnyAsync(p => p.CodigoBarras == editarProductoDto.CodigoBarras);
                     if (codigoBarrasExiste)
                     {
+                        _logger.LogWarning("El codigo de barras: {codigoBarras} se encuentra registrado en otro producto.", editarProductoDto.CodigoBarras);
                         return new RespuestaApi<Producto>
                         {
                             Exito = false,
@@ -317,6 +337,7 @@ namespace maverickApi.Services
 
                 await _dbContext.SaveChangesAsync();
                 await tx.CommitAsync();
+                _logger.LogInformation("Se actualizo correctamente el producto: {Nombre} correctamente.", productoExistente.Nombre);
                 return new RespuestaApi<Producto>
                 {
                     Exito = true,
@@ -324,9 +345,10 @@ namespace maverickApi.Services
                     Datos = productoExistente
                 };
             }
-            catch
+            catch (Exception ex)
             {
                 await tx.RollbackAsync();
+                _logger.LogError(ex, "Error al editar el producto: {Nombre}", editarProductoDto.Nombre);
                 return new RespuestaApi<Producto>
                 {
                     Exito = false,
@@ -342,6 +364,7 @@ namespace maverickApi.Services
                 var producto = await _dbContext.Productos.FirstOrDefaultAsync(p => p.Id == editarEstadoDto.Id);
                 if (producto == null)
                 {
+                    _logger.LogWarning("El producto con id: {Id} no existe.", editarEstadoDto.Id);
                     return new RespuestaApi<Producto>
                     {
                         Exito = false,
@@ -351,6 +374,7 @@ namespace maverickApi.Services
                 }
                 producto.Activo = editarEstadoDto.NuevoEstado;
                 await _dbContext.SaveChangesAsync();
+                _logger.LogInformation("El estado del producto se actualizo correctamente.");
                 return new RespuestaApi<Producto>
                 {
                     Exito = true,
@@ -358,8 +382,9 @@ namespace maverickApi.Services
                     Datos = producto
                 };
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error al actualizar el estado del producto con id: {Id}", editarEstadoDto.Id);
                 return new RespuestaApi<Producto>
                 {
                     Exito = false,

@@ -57,7 +57,7 @@ namespace maverickApi.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Excepcion al intentar crear al cliente con Rfc: {Rfc}.", cliente.Rfc);
+                _logger.LogError(ex, "Excepcion al intentar crear al cliente con Rfc: {Rfc}.", cliente.Rfc ?? "N/A");
                 return new RespuestaApi<Cliente>
                 {
                     Exito = false,

@@ -13,59 +13,86 @@ namespace maverickApi.Services
         private readonly ApplicationDbContext _dbContext;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _htttContextAccessor;
-        public UsuarioService(ApplicationDbContext DbContext, IConfiguration Configuration, IHttpContextAccessor httpContextAccessor)
+        private readonly ILogger<UsuarioService> _logger;
+        public UsuarioService(ApplicationDbContext DbContext, IConfiguration Configuration, IHttpContextAccessor httpContextAccessor, ILogger<UsuarioService> logger)
         {
             _dbContext = DbContext;
             _configuration = Configuration;
             _htttContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
         public async Task<RespuestaApi<Usuario>> CrearUsuarioAsync(Usuario usuario)
         {
-            if (string.IsNullOrWhiteSpace(usuario.Nombre) || string.IsNullOrWhiteSpace(usuario.Apellidos) || string.IsNullOrWhiteSpace(usuario.PasswordHash) || string.IsNullOrWhiteSpace(usuario.Email))
+            try
             {
+                if (string.IsNullOrWhiteSpace(usuario.Nombre) || string.IsNullOrWhiteSpace(usuario.Apellidos) || string.IsNullOrWhiteSpace(usuario.PasswordHash) || string.IsNullOrWhiteSpace(usuario.Email))
+                {
+                    _logger.LogWarning("Validacion fallida. Faltan datos obligatorios. Nombre recibido: {Nombre}, apellidos recibidos: {Apellidos}, email recibido: {Email}.", usuario.Nombre, usuario.Apellidos, usuario.Email);
+                    return new RespuestaApi<Usuario>
+                    {
+                        Exito = false,
+                        Mensaje = "No debe haber campos vacios",
+                        Datos = null
+                    };
+                }
+
+                var existeCorreo = await _dbContext.Usuarios.AnyAsync(u => u.Email == usuario.Email);
+
+                if (existeCorreo)
+                {
+                    _logger.LogWarning("Intento de registro duplicado. Ya existe un usuario con el correo electrónico: {Email}.", usuario.Email);
+                    return new RespuestaApi<Usuario>
+                    {
+                        Exito = false,
+                        Mensaje = "Este correo electrónico ya se encuentra registrado.",
+                        Datos = null
+                    };
+                }
+
+                usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(usuario.PasswordHash);
+
+                _dbContext.Usuarios.Add(usuario);
+                await _dbContext.SaveChangesAsync();
+
+                BorrarHash(usuario);
+                _logger.LogInformation("Usuario registrado exitosamente. Id: {Id}, nombre: {Nombre} y correo: {Email}.", usuario.Id, usuario.Nombre, usuario.Email);
+                return new RespuestaApi<Usuario>
+                {
+                    Exito = true,
+                    Mensaje = "El usuario se agrego correctamente",
+                    Datos = usuario
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Excepcion al crear el usuario.");
                 return new RespuestaApi<Usuario>
                 {
                     Exito = false,
-                    Mensaje = "No debe haber campos vacios",
+                    Mensaje = "Ocurrio un error al intentar crear el usuario, intentelo de nuevo.",
                     Datos = null
                 };
             }
-
-            var existeCorreo = await _dbContext.Usuarios.AnyAsync(u => u.Email == usuario.Email);
-
-            if (existeCorreo)
-            {
-                return new RespuestaApi<Usuario>
-                {
-                    Exito = false,
-                    Mensaje = "Este correo electrónico ya se encuentra registrado.",
-                    Datos = null
-                };
-            }
-
-            usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(usuario.PasswordHash);
-
-            _dbContext.Usuarios.Add(usuario);
-            await _dbContext.SaveChangesAsync();
-
-            BorrarHash(usuario);
-
-            return new RespuestaApi<Usuario>
-            {
-                Exito = true,
-                Mensaje = "El usuario se agrego correctamente",
-                Datos = usuario
-            };
         }
         public async Task<RespuestaApi<List<Usuario>>> ObtenerUsuariosAsync()
         {
             try
             {
-                //var usuarios = await _dbContext.Usuarios.Where(u => u.Activo == true).ToListAsync();
-                var usuarios = await _dbContext.Usuarios.ToListAsync();
-
+                var usuarios = await _dbContext.Usuarios.Where(u => u.Activo == true).ToListAsync();
+                // var usuarios = await _dbContext.Usuarios.ToListAsync();
+                if (usuarios.Count() == 0 || usuarios == null)
+                {
+                    _logger.LogWarning("No se encontraron usuarios en la base de datos.");
+                    return new RespuestaApi<List<Usuario>>
+                    {
+                        Exito = false,
+                        Mensaje = "No se encontraron usuarios en la base de datos.",
+                        Datos = null
+                    };
+                }
                 usuarios.ForEach(u => BorrarHash(u));
 
+                _logger.LogInformation("Se obtuvieron {Count} usuarios de la base de datos.", usuarios.Count());
                 return new RespuestaApi<List<Usuario>>
                 {
                     Exito = true,
@@ -73,8 +100,9 @@ namespace maverickApi.Services
                     Datos = usuarios
                 };
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Excepcion al obtener los usuarios");
                 return new RespuestaApi<List<Usuario>>
                 {
                     Exito = false,
@@ -89,6 +117,7 @@ namespace maverickApi.Services
             {
                 if (string.IsNullOrWhiteSpace(busqueda))
                 {
+                    _logger.LogWarning("El termino de busqueda se recibio vacio o nulo.");
                     return new RespuestaApi<List<Usuario>>
                     {
                         Exito = false,
@@ -110,6 +139,7 @@ namespace maverickApi.Services
 
                 if (usuarios == null || usuarios.Count() == 0)
                 {
+                    _logger.LogWarning("La busqueda de usuarios no arrojo resultados para el termino de busqueda: {Busqueda}.", busqueda);
                     return new RespuestaApi<List<Usuario>>
                     {
                         Exito = true,
@@ -117,7 +147,7 @@ namespace maverickApi.Services
                         Datos = null
                     };
                 }
-
+                _logger.LogInformation("Se encontraron {Count} usuarios para el termino  de busqueda: {busqueda}.", usuarios.Count(), busqueda);
                 return new RespuestaApi<List<Usuario>>
                 {
                     Exito = true,
@@ -125,8 +155,9 @@ namespace maverickApi.Services
                     Datos = usuarios
                 };
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Excepcion al buscar usuarios con el termino de busqueda: {Busqueda}.", busqueda);
                 return new RespuestaApi<List<Usuario>>
                 {
                     Exito = false,
@@ -144,6 +175,7 @@ namespace maverickApi.Services
                 if (usuarioExistente == null)
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("No se encontro el usuario con id: {Id}.", editarUsuarioDto.Id);
                     return new RespuestaApi<Usuario>
                     {
                         Exito = false,
@@ -155,6 +187,7 @@ namespace maverickApi.Services
                 if (existeCorreo)
                 {
                     await tx.RollbackAsync();
+                    _logger.LogWarning("Intento de registro duplicado. El correo: {Email} ya se encuentra registrado en otro usuario.", editarUsuarioDto.Email);
                     return new RespuestaApi<Usuario>
                     {
                         Exito = false,
@@ -185,7 +218,7 @@ namespace maverickApi.Services
                 await tx.CommitAsync();
 
                 BorrarHash(usuario);
-
+                _logger.LogInformation("Se actualizo correctamente el usuario con id: {Id} nombre: {Nombre} y correo: {Email}.", usuario.Id, usuario.Nombre, usuario.Email);
                 return new RespuestaApi<Usuario>
                 {
                     Exito = true,
@@ -193,9 +226,10 @@ namespace maverickApi.Services
                     Datos = usuarioExistente
                 };
             }
-            catch
+            catch (Exception ex)
             {
                 await tx.RollbackAsync();
+                _logger.LogError(ex, "Excepcion al actualizada el usuario con id: {Id}.", editarUsuarioDto.Id);
                 return new RespuestaApi<Usuario>
                 {
                     Exito = false,
@@ -206,41 +240,56 @@ namespace maverickApi.Services
         }
         public async Task<RespuestaApi<Usuario>> CambiarPasswordAsync(CambiarPasswordDto cambiarPasswordDto)
         {
-            var usuarioExistente = await _dbContext.Usuarios.FirstOrDefaultAsync(u => u.Id == cambiarPasswordDto.UsuarioId);
-            if (usuarioExistente == null)
+            try
             {
+                var usuarioExistente = await _dbContext.Usuarios.FirstOrDefaultAsync(u => u.Id == cambiarPasswordDto.UsuarioId);
+                if (usuarioExistente == null)
+                {
+                    _logger.LogWarning("No se encontro el usuario con id: {Id}.", cambiarPasswordDto.UsuarioId);
+                    return new RespuestaApi<Usuario>
+                    {
+                        Exito = false,
+                        Mensaje = "El usuario que intentas editar no existe en la base de datos",
+                        Datos = null
+                    };
+                }
+
+                bool contraseñaValida = BCrypt.Net.BCrypt.Verify(cambiarPasswordDto.PasswordActual, usuarioExistente.PasswordHash);
+
+                if (!contraseñaValida)
+                {
+                    _logger.LogWarning("La contraseña ingresada es incorrecta.");
+                    return new RespuestaApi<Usuario>
+                    {
+                        Exito = false,
+                        Mensaje = "La contraseña que ingresaste es incorrecta.",
+                        Datos = null
+                    };
+                }
+
+                usuarioExistente.PasswordHash = BCrypt.Net.BCrypt.HashPassword(cambiarPasswordDto.NuevaPassword);
+
+                await _dbContext.SaveChangesAsync();
+
+                BorrarHash(usuarioExistente);
+                _logger.LogInformation("Se actualizo exitosamente la contraseña del usuario: {Nombre}.", usuarioExistente.Nombre);
+                return new RespuestaApi<Usuario>
+                {
+                    Exito = true,
+                    Mensaje = "Contraseña actualizada correctamente",
+                    Datos = usuarioExistente
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Excepcion al actualizar la contraseña.");
                 return new RespuestaApi<Usuario>
                 {
                     Exito = false,
-                    Mensaje = "El usuario que intentas editar no existe en la base de datos",
+                    Mensaje = "Ocurrio un error al actualizar la contraseña de el usuario.",
                     Datos = null
                 };
             }
-
-            bool contraseñaValida = BCrypt.Net.BCrypt.Verify(cambiarPasswordDto.PasswordActual, usuarioExistente.PasswordHash);
-
-            if (!contraseñaValida)
-            {
-                return new RespuestaApi<Usuario>
-                {
-                    Exito = false,
-                    Mensaje = "La contraseña que ingresaste es incorrecta.",
-                    Datos = null
-                };
-            }
-
-            usuarioExistente.PasswordHash = BCrypt.Net.BCrypt.HashPassword(cambiarPasswordDto.NuevaPassword);
-
-            await _dbContext.SaveChangesAsync();
-
-            BorrarHash(usuarioExistente);
-
-            return new RespuestaApi<Usuario>
-            {
-                Exito = true,
-                Mensaje = "Contraseña actualizada correctamente",
-                Datos = usuarioExistente
-            };
         }
         public async Task<RespuestaApi<Usuario>> EditarEstadoAsync(EditarEstadoDto editarEstadoDto)
         {
@@ -249,6 +298,7 @@ namespace maverickApi.Services
                 var usuarioExistente = await _dbContext.Usuarios.FindAsync(editarEstadoDto.Id);
                 if (usuarioExistente == null)
                 {
+                    _logger.LogWarning("No se encontro el usuario con id: {Id}.", editarEstadoDto.Id);
                     return new RespuestaApi<Usuario>
                     {
                         Exito = false,
@@ -260,7 +310,7 @@ namespace maverickApi.Services
                 usuarioExistente.Activo = editarEstadoDto.NuevoEstado;
                 await _dbContext.SaveChangesAsync();
                 BorrarHash(usuarioExistente);
-
+                _logger.LogInformation("Se actualizo el estado de el usuario: {Nombre} exitosamente.", usuarioExistente.Nombre);
                 return new RespuestaApi<Usuario>
                 {
                     Exito = true,
@@ -269,8 +319,9 @@ namespace maverickApi.Services
                 };
 
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Excepcion al actualizar el estado de el usuario.");
                 return new RespuestaApi<Usuario>
                 {
                     Exito = false,

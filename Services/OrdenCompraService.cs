@@ -262,7 +262,10 @@ namespace maverickApi.Services
 
                 if (ordenCompraEditar.Detalles != null && ordenCompraEditar.Detalles.Any())
                 {
-                    _dbContext.DetalleOrdenCompras.RemoveRange(ordenExistente.Detalles);
+                    foreach (var detalle in ordenExistente.Detalles.ToList())
+                    {
+                        _dbContext.DetalleOrdenCompras.Remove(detalle);
+                    }
                     Decimal nuevoTotal = 0;
                     foreach (var item in ordenCompraEditar.Detalles)
                     {
@@ -324,6 +327,177 @@ namespace maverickApi.Services
                 {
                     Exito = false,
                     Mensaje = $"Ocurrio Un error al editar la orden.{ex.Message}",
+                    Datos = null
+                };
+            }
+        }
+
+        public async Task<RespuestaApi<OrdenCompra>> MarcarOrdenRecibidaAsync(int id)
+        {
+            using var tx = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                if (id == 0)
+                {
+                    await tx.RollbackAsync();
+                    _logger.LogWarning("El id recibido no puede ser: {Id}", id);
+                    return new RespuestaApi<OrdenCompra>
+                    {
+                        Exito = false,
+                        Mensaje = "Hubo un error al recibir el identificador de la orden de compra.",
+                        Datos = null
+                    };
+                }
+                var ordenCompra = await _dbContext.OrdenCompras
+                .Where(oc => oc.Id == id)
+                .Include(oc => oc.Detalles)
+                .FirstOrDefaultAsync();
+
+                if (ordenCompra == null)
+                {
+                    await tx.RollbackAsync();
+                    _logger.LogWarning("La orden de compra con id: {Id} no se encontro en la base de datos.", id);
+                    return new RespuestaApi<OrdenCompra>
+                    {
+                        Exito = false,
+                        Mensaje = "No se encontro la orden de compra, intentelo de nuevo mas tarde.",
+                        Datos = null
+                    };
+                }
+                if (ordenCompra.Estado == "Cancelada")
+                {
+                    await tx.RollbackAsync();
+                    _logger.LogWarning("La orden de compra con id: {Id} se encuentra con estado cancelada", id);
+                    return new RespuestaApi<OrdenCompra>
+                    {
+                        Exito = false,
+                        Mensaje = "La orden de compra se encuentra cancelada, no se puede marcar como recibida.",
+                        Datos = null
+                    };
+                }
+                if (ordenCompra.Estado == "Recibida")
+                {
+                    await tx.RollbackAsync();
+                    _logger.LogWarning("La orden de compra con id: {Id} ya estaba marcada como recibida", id);
+                    return new RespuestaApi<OrdenCompra>
+                    {
+                        Exito = false,
+                        Mensaje = "La orden de compra ya fue marcada como recibida anteriormente.",
+                        Datos = null
+                    };
+                }
+
+                foreach (var item in ordenCompra.Detalles)
+                {
+                    var producto = await _dbContext.Productos
+                    .Where(p => p.Id == item.ProductoId)
+                    .Where(p => p.Activo == true)
+                    .FirstOrDefaultAsync();
+
+                    if (producto == null)
+                    {
+                        await tx.RollbackAsync();
+                        _logger.LogWarning("El producto con id: {Id} no se encontro en la base de datos.", item.ProductoId);
+                        return new RespuestaApi<OrdenCompra>
+                        {
+                            Exito = false,
+                            Mensaje = $"El producto '{item.Producto?.Nombre ?? "Desconocido"}' " +
+                  "ya no está disponible en el catálogo.",
+                            Datos = null
+                        };
+                    }
+                    producto.Stock += item.Cantidad;
+                }
+
+
+                ordenCompra.Estado = "Recibida";
+                ordenCompra.FechaEntrega = DateTime.Now;
+                await _dbContext.SaveChangesAsync();
+
+                await tx.CommitAsync();
+                _logger.LogInformation("Se marco como recibida la orden de compra con id: {Id}.", id);
+                return new RespuestaApi<OrdenCompra>
+                {
+                    Exito = true,
+                    Mensaje = "La orden se marco como recibida correctamente.",
+                    Datos = ordenCompra
+                };
+            }
+            catch (Exception ex)
+            {
+                await tx.RollbackAsync();
+                _logger.LogError(ex, "Excepcion al marcar orden como recibida.");
+                return new RespuestaApi<OrdenCompra>
+                {
+                    Exito = false,
+                    Mensaje = "Error al marcar orden como recibida.",
+                    Datos = null
+                };
+            }
+        }
+        public async Task<RespuestaApi<OrdenCompra>> MarcarOrdenCanceladaAsync(int id)
+        {
+            using var tx = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                if (id == 0)
+                {
+                    await tx.RollbackAsync();
+                    _logger.LogWarning("El id recibido no puede ser: {Id}", id);
+                    return new RespuestaApi<OrdenCompra>
+                    {
+                        Exito = false,
+                        Mensaje = "Ocurrio un error al recibir el identificador de la orden de compra.",
+                        Datos = null
+                    };
+                }
+                var ordenCompra = await _dbContext.OrdenCompras
+                .Where(oc => oc.Id == id)
+                .FirstOrDefaultAsync();
+                if (ordenCompra == null)
+                {
+                    await tx.RollbackAsync();
+                    _logger.LogWarning("La orden de compra con id: {Id} no se encontro en la base de datos.", id);
+                    return new RespuestaApi<OrdenCompra>
+                    {
+                        Exito = false,
+                        Mensaje = "No se encontro la orden de compra.",
+                        Datos = null
+                    };
+                }
+                if (ordenCompra.Estado == "Recibida")
+                {
+                    await tx.RollbackAsync();
+                    _logger.LogWarning("La orden de compra con id: {Id} se encuentra con estado Recibida", id);
+                    return new RespuestaApi<OrdenCompra>
+                    {
+                        Exito = false,
+                        Mensaje = "La orden que intenta cancelar se encuentra con estado recibida.",
+                        Datos = null
+                    };
+                }
+
+                ordenCompra.Estado = "Cancelada";
+
+                await _dbContext.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                _logger.LogInformation("La orden de compra con id: {Id} se cancelo correctamente.", id);
+                return new RespuestaApi<OrdenCompra>
+                {
+                    Exito = true,
+                    Mensaje = "Se cancelo correctamente la orden de compra.",
+                    Datos = ordenCompra
+                };
+            }
+            catch (Exception ex)
+            {
+                await tx.RollbackAsync();
+                _logger.LogError(ex, "Excepcion al marcar la orden con id: {Id} como cancelada.", id);
+                return new RespuestaApi<OrdenCompra>
+                {
+                    Exito = false,
+                    Mensaje = "Ocurrio un error al marcar la orden como cancelada.",
                     Datos = null
                 };
             }

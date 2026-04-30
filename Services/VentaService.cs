@@ -13,11 +13,13 @@ namespace maverickApi.Services
         private readonly ApplicationDbContext _dbContext;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public VentaService(ApplicationDbContext DbContext, IConfiguration Configuration, IHttpContextAccessor httpContextAccessor)
+        private readonly ILogger<VentaService> _logger;
+        public VentaService(ApplicationDbContext DbContext, IConfiguration Configuration, IHttpContextAccessor httpContextAccessor, ILogger<VentaService> logger)
         {
             _dbContext = DbContext;
             _configuration = Configuration;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
         public async Task<RespuestaApi<Venta>> CrearVentaAsync(Venta venta)
         {
@@ -29,6 +31,7 @@ namespace maverickApi.Services
 
                 if (usuarioId == 0)
                 {
+                    _logger.LogWarning("El usuario no se autentico correctamente.");
                     return new RespuestaApi<Venta>
                     {
                         Exito = false,
@@ -40,7 +43,7 @@ namespace maverickApi.Services
                 if (usuario == null)
                 {
                     await tx.RollbackAsync();
-
+                    _logger.LogWarning("El usuario con id: {Id} no se encontro en la base de datos.", usuarioId);
                     return new RespuestaApi<Venta>
                     {
                         Exito = false,
@@ -50,16 +53,19 @@ namespace maverickApi.Services
                 }
                 usuario.PasswordHash = "";
                 var cliente = await _dbContext.Clientes.FirstOrDefaultAsync(c => c.Id == venta.ClienteId);
-                if (cliente == null)
+                if (venta.ClienteId != 0)
                 {
-                    await tx.RollbackAsync();
-
-                    return new RespuestaApi<Venta>
+                    if (cliente == null)
                     {
-                        Exito = false,
-                        Mensaje = "El cliente no se registro correctamente, reintentalo de nuevo.",
-                        Datos = null
-                    };
+                        await tx.RollbackAsync();
+                        _logger.LogWarning("El cliente con id: {Id} no es encontro.", venta.ClienteId);
+                        return new RespuestaApi<Venta>
+                        {
+                            Exito = false,
+                            Mensaje = "El cliente no se registro correctamente, reintentalo de nuevo.",
+                            Datos = null
+                        };
+                    }
                 }
                 var nuevaVenta = new Venta
                 {
@@ -67,7 +73,7 @@ namespace maverickApi.Services
                     UsuarioId = usuarioId,
                     Usuario = usuario,
                     ClienteId = venta.ClienteId,
-                    Cliente = cliente
+                    Cliente = cliente ?? null
                 };
 
                 nuevaVenta.Detalles = new List<DetalleVenta>();
@@ -83,6 +89,7 @@ namespace maverickApi.Services
                     if (producto == null)
                     {
                         await tx.RollbackAsync();
+                        _logger.LogWarning("No se encontro el producto con id: {Id}.", item.Id);
                         return new RespuestaApi<Venta>
                         {
                             Exito = false,
@@ -93,6 +100,7 @@ namespace maverickApi.Services
                     if (producto.Stock < item.Cantidad)
                     {
                         await tx.RollbackAsync();
+                        _logger.LogWarning("No existe stock suficiente para el producto con id: {Id}.", item.Id);
                         return new RespuestaApi<Venta>
                         {
                             Exito = false,
@@ -117,9 +125,12 @@ namespace maverickApi.Services
                 nuevaVenta.Subtotal = SubtotalBruto - nuevaVenta.Descuento;
                 nuevaVenta.Iva = Math.Round(nuevaVenta.Subtotal * 0.16m, 2);
                 nuevaVenta.Total = nuevaVenta.Subtotal + nuevaVenta.Iva;
+
                 _dbContext.Ventas.Add(nuevaVenta);
                 await _dbContext.SaveChangesAsync();
                 await tx.CommitAsync();
+
+                _logger.LogInformation("Venta registrada exitosamente. Con id: {Id}, con un monto total de: ${Total}", nuevaVenta.Id, nuevaVenta.Total);
                 return new RespuestaApi<Venta>
                 {
                     Exito = true,
@@ -127,9 +138,10 @@ namespace maverickApi.Services
                     Datos = nuevaVenta
                 };
             }
-            catch
+            catch (Exception ex)
             {
                 await tx.RollbackAsync();
+                _logger.LogError(ex, "Excepcion al crear una nueva venta.");
                 return new RespuestaApi<Venta>
                 {
                     Exito = false,
@@ -152,6 +164,7 @@ namespace maverickApi.Services
 
                 if (ventas == null || ventas.Count == 0)
                 {
+                    _logger.LogInformation("No se encontraron ventas.");
                     return new RespuestaApi<List<Venta>>
                     {
                         Exito = false,
@@ -159,6 +172,7 @@ namespace maverickApi.Services
                         Datos = null
                     };
                 }
+                _logger.LogInformation("Se obtuvieron {Count} ventas en la base de datos.", ventas.Count());
                 return new RespuestaApi<List<Venta>>
                 {
                     Exito = true,
@@ -166,8 +180,9 @@ namespace maverickApi.Services
                     Datos = ventas
                 };
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Excepcion al obtener las ventas.");
                 return new RespuestaApi<List<Venta>>
                 {
                     Exito = false,
@@ -190,8 +205,8 @@ namespace maverickApi.Services
                 return 1;
             }
 
-            var partes = ultimaVenta.NumeroVenta.Split("-");
-            if (partes.Length == 3)
+            var partes = ultimaVenta.NumeroVenta?.Split("-");
+            if (partes?.Length == 3)
             {
                 var ultimoNumeroVenta = int.Parse(partes[2]);
                 return ultimoNumeroVenta + 1;

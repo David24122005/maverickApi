@@ -10,7 +10,7 @@ namespace maverickApi.Models
         public String? NumeroVenta { get; set; }
         public int UsuarioId { get; set; }
         public Usuario? Usuario { get; set; }
-        public int ClienteId { get; set; }
+        public int? ClienteId { get; set; } = 0;
         public Cliente? Cliente { get; set; }
         [Column(TypeName = "decimal(18,4)")]
         public decimal SubtotalBruto { get; set; }

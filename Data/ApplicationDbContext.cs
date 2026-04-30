@@ -59,7 +59,6 @@ namespace maverickApi.Data
                     Id = 1,
                     Nombre = "Motor",
                     Descripcion = "Material para motor",
-                    Productos = new List<Producto>()
 
                 },
                 new Categoria
@@ -67,7 +66,6 @@ namespace maverickApi.Data
                     Id = 2,
                     Nombre = "Transmision",
                     Descripcion = "Material para transmision",
-                    Productos = new List<Producto>()
 
                 },
                 new Categoria
@@ -75,7 +73,6 @@ namespace maverickApi.Data
                     Id = 3,
                     Nombre = "Suspension",
                     Descripcion = "Material para suspension",
-                    Productos = new List<Producto>()
 
                 },
                 new Categoria
@@ -83,7 +80,6 @@ namespace maverickApi.Data
                     Id = 4,
                     Nombre = "Embrague",
                     Descripcion = "Material para Embrague",
-                    Productos = new List<Producto>()
 
                 },
                  new Categoria
@@ -91,7 +87,6 @@ namespace maverickApi.Data
                      Id = 5,
                      Nombre = "Hidraulica",
                      Descripcion = "Material de Hidraulica",
-                     Productos = new List<Producto>()
 
                  });
             // //Insertar proveedores
@@ -105,7 +100,6 @@ namespace maverickApi.Data
                     Direccion = "Col Miguel Hidalgo, Ciudad de Mexico.",
                     Rfc = "A12345678",
                     Activo = true,
-                    Productos = new List<Producto>(),
                     FechaCreacion = DateTime.Now
 
                 },
@@ -118,7 +112,6 @@ namespace maverickApi.Data
                     Direccion = "Blvd Benjamin Hill Culiacan Sin.",
                     Rfc = "H1234567890",
                     Activo = true,
-                    Productos = new List<Producto>(),
                     FechaCreacion = DateTime.Now
 
                 },
@@ -131,7 +124,6 @@ namespace maverickApi.Data
                     Direccion = "Blvd Enrique Cabrera Culiacan Sin.",
                     Rfc = "D12345",
                     Activo = false,
-                    Productos = new List<Producto>(),
                     FechaCreacion = DateTime.Now
 
                 });

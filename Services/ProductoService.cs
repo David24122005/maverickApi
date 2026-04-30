@@ -161,6 +161,8 @@ namespace maverickApi.Services
                 };
             }
         }
+        //agregar el buscar por codigode barras para usar el scanner
+
         public async Task<RespuestaApi<List<Producto>>> ObtenerProductosPorFiltrosAsync(string busqueda)
         {
 
@@ -232,6 +234,7 @@ namespace maverickApi.Services
                 var productoExistente = await _dbContext.Productos.FindAsync(editarProductoDto.Id);
                 if (productoExistente == null)
                 {
+                    await tx.RollbackAsync();
                     _logger.LogWarning("No se encontro el producto: {Nombre}.", editarProductoDto.Nombre);
                     return new RespuestaApi<Producto>
                     {
@@ -246,6 +249,7 @@ namespace maverickApi.Services
                     var existeSku = await _dbContext.Productos.AnyAsync(p => p.Sku == skuLimpio && p.Id != editarProductoDto.Id);
                     if (existeSku)
                     {
+                        await tx.RollbackAsync();
                         _logger.LogWarning("El sku: {sku} ya se encuentra registrado en otro producto.", editarProductoDto.Sku);
                         return new RespuestaApi<Producto>
                         {
@@ -262,6 +266,7 @@ namespace maverickApi.Services
 
                     if (categoriaNueva == null)
                     {
+                        await tx.RollbackAsync();
                         _logger.LogWarning("La categoria no existe.");
                         return new RespuestaApi<Producto>
                         {
@@ -278,6 +283,7 @@ namespace maverickApi.Services
                         .FirstOrDefaultAsync(p => p.Id == editarProductoDto.ProveedorId);
                     if (proveedorNuevo == null)
                     {
+                        await tx.RollbackAsync();
                         _logger.LogWarning("El proveedor no existe.");
                         return new RespuestaApi<Producto>
                         {
@@ -296,6 +302,7 @@ namespace maverickApi.Services
                         .AnyAsync(p => p.CodigoBarras == editarProductoDto.CodigoBarras);
                     if (codigoBarrasExiste)
                     {
+                        await tx.RollbackAsync();
                         _logger.LogWarning("El codigo de barras: {codigoBarras} se encuentra registrado en otro producto.", editarProductoDto.CodigoBarras);
                         return new RespuestaApi<Producto>
                         {

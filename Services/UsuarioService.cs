@@ -54,7 +54,7 @@ namespace maverickApi.Services
                 _dbContext.Usuarios.Add(usuario);
                 await _dbContext.SaveChangesAsync();
 
-                BorrarHash(usuario);
+                usuario.BorrarHash();
                 _logger.LogInformation("Usuario registrado exitosamente. Id: {Id}, nombre: {Nombre} y correo: {Email}.", usuario.Id, usuario.Nombre, usuario.Email);
                 return new RespuestaApi<Usuario>
                 {
@@ -90,7 +90,7 @@ namespace maverickApi.Services
                         Datos = null
                     };
                 }
-                usuarios.ForEach(u => BorrarHash(u));
+                usuarios.ForEach(u => u.BorrarHash());
 
                 _logger.LogInformation("Se obtuvieron {Count} usuarios de la base de datos.", usuarios.Count());
                 return new RespuestaApi<List<Usuario>>
@@ -135,7 +135,7 @@ namespace maverickApi.Services
                 (busqueda == "inactivo" && !u.Activo)
                 ).ToListAsync();
 
-                usuarios.ForEach(u => BorrarHash(u));
+                usuarios.ForEach(u => u.BorrarHash());
 
                 if (usuarios == null || usuarios.Count() == 0)
                 {
@@ -217,7 +217,7 @@ namespace maverickApi.Services
                 await _dbContext.SaveChangesAsync();
                 await tx.CommitAsync();
 
-                BorrarHash(usuario);
+                usuario.BorrarHash();
                 _logger.LogInformation("Se actualizo correctamente el usuario con id: {Id} nombre: {Nombre} y correo: {Email}.", usuario.Id, usuario.Nombre, usuario.Email);
                 return new RespuestaApi<Usuario>
                 {
@@ -271,7 +271,7 @@ namespace maverickApi.Services
 
                 await _dbContext.SaveChangesAsync();
 
-                BorrarHash(usuarioExistente);
+                usuarioExistente.BorrarHash();
                 _logger.LogInformation("Se actualizo exitosamente la contraseña del usuario: {Nombre}.", usuarioExistente.Nombre);
                 return new RespuestaApi<Usuario>
                 {
@@ -309,7 +309,7 @@ namespace maverickApi.Services
 
                 usuarioExistente.Activo = editarEstadoDto.NuevoEstado;
                 await _dbContext.SaveChangesAsync();
-                BorrarHash(usuarioExistente);
+                usuarioExistente.BorrarHash();
                 _logger.LogInformation("Se actualizo el estado de el usuario: {Nombre} exitosamente.", usuarioExistente.Nombre);
                 return new RespuestaApi<Usuario>
                 {
@@ -329,10 +329,6 @@ namespace maverickApi.Services
                     Datos = null
                 };
             }
-        }
-        private void BorrarHash(Usuario usuario)
-        {
-            usuario.PasswordHash = "";
         }
     }
 }

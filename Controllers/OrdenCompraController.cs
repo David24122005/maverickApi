@@ -52,6 +52,18 @@ namespace maverickApi.Controllers
             }
             return Ok(response);
         }
+        //http://localhost:5000/api/OrdenCompra/marcar/recibida/{id}
+        [HttpPatch("marcar/recibida/{id}")]
+        public async Task<ActionResult<RespuestaApi<OrdenCompra>>> MarcarOrdenRecibida(int id)
+        {
+            var response = await _iOrdenCompraService.MarcarOrdenRecibidaAsync(id);
+            if (!response.Exito)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
 
 
 

@@ -14,5 +14,15 @@ namespace maverickApi.Models
         public string? PasswordHash { get; set; }
         public bool Activo { get; set; } = true;
         public DateTime FechaCreacion { get; set; } = DateTime.Now;
+
+
+        public void BorrarHash()
+        {
+            this.PasswordHash = string.Empty;
+        }
     }
+
+
 }
+
+

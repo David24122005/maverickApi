@@ -162,6 +162,55 @@ namespace maverickApi.Services
             }
         }
         //agregar el buscar por codigode barras para usar el scanner
+        public async Task<RespuestaApi<Producto>> ObtenerProductoPorCodigoAsync(string codigo)
+        {
+            try
+            {
+                codigo.Replace(" ", "");
+                var productoEncontrado = await _dbContext.Productos
+                .Where(p => p.CodigoBarras == codigo)
+                .FirstOrDefaultAsync();
+
+                if (productoEncontrado == null)
+                {
+                    _logger.LogWarning("No se encontro el producto con el codigo de barras: {CodigoBarras}", codigo);
+                    return new RespuestaApi<Producto>
+                    {
+                        Exito = false,
+                        Mensaje = "No se pudo encontrar un producto con el codigo de barras.",
+                        Datos = null
+                    };
+                }
+                if (!productoEncontrado.Activo)
+                {
+                    _logger.LogWarning("El producto con codgio de barras: {CodigoBarras} se encuentra desactivado.", productoEncontrado.CodigoBarras);
+                    return new RespuestaApi<Producto>
+                    {
+                        Exito = false,
+                        Mensaje = "Verifique que el codigo pertencezca a un producto activo.",
+                        Datos = null
+                    };
+                }
+
+                _logger.LogInformation("Se obtuvo el producto con id: {Id} con el codigo de barras: {CodigoBarras}.", productoEncontrado.Id, productoEncontrado.CodigoBarras);
+                return new RespuestaApi<Producto>
+                {
+                    Exito = true,
+                    Mensaje = "El producto se obtuvo correctamente.",
+                    Datos = productoEncontrado
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception al obtener el producto por el codigo de barras.");
+                return new RespuestaApi<Producto>
+                {
+                    Exito = false,
+                    Mensaje = "Ocurrió un error al obtener el producto por el codigo de barras.",
+                    Datos = null
+                };
+            }
+        }
 
         public async Task<RespuestaApi<List<Producto>>> ObtenerProductosPorFiltrosAsync(string busqueda)
         {

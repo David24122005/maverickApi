@@ -8,7 +8,7 @@ namespace maverickApi.Interfaces
         Task<RespuestaApi<Producto>> CrearProductoAsync(Producto producto);
         Task<RespuestaApi<List<Producto>>> ObtenerProductosAsync();
         Task<RespuestaApi<List<Producto>>> ObtenerProductosPorFiltrosAsync(string busqueda);
-
+        Task<RespuestaApi<Producto>> ObtenerProductoPorCodigoAsync(string codigo);
 
 
         Task<RespuestaApi<Producto>> EditarProductoAsync(EditarProductoDto editarProductoDto);

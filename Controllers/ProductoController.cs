@@ -53,6 +53,17 @@ namespace maverickApi.Controllers
 
             return Ok(response);
         }
+        //http://localhost:5000/api/Producto/obtener/{codigo}
+        [HttpGet("obtener/{codigo}")]
+        public async Task<ActionResult<RespuestaApi<Producto>>> ObtenerProductoPorCodigo(string codigo)
+        {
+            var response = await _iProductoService.ObtenerProductoPorCodigoAsync(codigo);
+            if (!response.Exito)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
         //http://localhost:5000/api/Producto/editar
         [HttpPatch("editar")]
         public async Task<ActionResult<RespuestaApi<Producto>>> EditarProducto(EditarProductoDto editarProductoDto)

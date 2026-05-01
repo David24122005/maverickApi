@@ -161,12 +161,11 @@ namespace maverickApi.Services
                 };
             }
         }
-        //agregar el buscar por codigode barras para usar el scanner
         public async Task<RespuestaApi<Producto>> ObtenerProductoPorCodigoAsync(string codigo)
         {
             try
             {
-                codigo.Replace(" ", "");
+                codigo = codigo.Replace(" ", "");
                 var productoEncontrado = await _dbContext.Productos
                 .Where(p => p.CodigoBarras == codigo)
                 .FirstOrDefaultAsync();
@@ -211,7 +210,6 @@ namespace maverickApi.Services
                 };
             }
         }
-
         public async Task<RespuestaApi<List<Producto>>> ObtenerProductosPorFiltrosAsync(string busqueda)
         {
 
@@ -348,7 +346,7 @@ namespace maverickApi.Services
                 {
                     editarProductoDto.CodigoBarras = editarProductoDto.CodigoBarras.Replace(" ", "");
                     var codigoBarrasExiste = await _dbContext.Productos
-                        .AnyAsync(p => p.CodigoBarras == editarProductoDto.CodigoBarras);
+                        .AnyAsync(p => p.CodigoBarras == editarProductoDto.CodigoBarras && p.Id != editarProductoDto.Id);
                     if (codigoBarrasExiste)
                     {
                         await tx.RollbackAsync();

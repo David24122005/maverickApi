@@ -75,7 +75,7 @@ namespace maverickApi.Services
             }
 
             var token = GenerateJwtToken(usuario);
-            usuario.PasswordHash = "";
+            usuario.BorrarHash();
 
             _logger.LogInformation("El usuario: {Nombre} se autentico correctamente.", usuario.Nombre);
             return new RespuestaApi<AutenticacionRespuesta>

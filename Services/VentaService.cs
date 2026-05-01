@@ -51,7 +51,7 @@ namespace maverickApi.Services
                         Datos = null
                     };
                 }
-                usuario.PasswordHash = "";
+                usuario.BorrarHash();
                 var cliente = await _dbContext.Clientes.FirstOrDefaultAsync(c => c.Id == venta.ClienteId);
                 if (venta.ClienteId != 0)
                 {

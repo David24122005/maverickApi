@@ -122,7 +122,7 @@ namespace maverickApi.Services
                 _dbContext.OrdenCompras.Add(nuevaOrden);
                 await _dbContext.SaveChangesAsync();
                 await tx.CommitAsync();
-                nuevaOrden.Usuario?.PasswordHash = "";
+                nuevaOrden.Usuario.BorrarHash();
                 nuevaOrden.Proveedor?.Productos = null;
 
                 _logger.LogInformation("Orden de compra registrada correctamente con id: {Id} con un monto total de {Total} pesos mexicanos.", nuevaOrden.Id, nuevaOrden.Total);
@@ -169,7 +169,7 @@ namespace maverickApi.Services
                 foreach (var item in ordenes)
                 {
                     item.Proveedor?.Productos = null;
-                    item.Usuario?.PasswordHash = null;
+                    item.Usuario.BorrarHash();
                 }
                 _logger.LogInformation("Se obtuvieron {Count} ordenes de compra de la base de datos.", ordenes.Count());
                 return new RespuestaApi<List<OrdenCompra>>
@@ -308,7 +308,7 @@ namespace maverickApi.Services
                 .Include(oc => oc.Usuario)
                 .FirstOrDefaultAsync(oc => oc.Id == ordenExistente.Id);
 
-                ordenActualizada?.Usuario?.PasswordHash = "";
+                ordenActualizada?.Usuario.BorrarHash();
                 _logger.LogInformation("La orden con id: {Id} y numero de orden: {NumeroCompra} se actualizo correctamente.", ordenActualizada.Id, ordenActualizada.NumeroCompra);
                 return new RespuestaApi<OrdenCompra>
                 {
@@ -331,7 +331,6 @@ namespace maverickApi.Services
                 };
             }
         }
-
         public async Task<RespuestaApi<OrdenCompra>> MarcarOrdenRecibidaAsync(int id)
         {
             using var tx = await _dbContext.Database.BeginTransactionAsync();

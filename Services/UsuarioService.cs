@@ -223,7 +223,7 @@ namespace maverickApi.Services
                 {
                     Exito = true,
                     Mensaje = "Usuario actualizado correctamente",
-                    Datos = usuarioExistente
+                    Datos = usuario
                 };
             }
             catch (Exception ex)
@@ -270,14 +270,14 @@ namespace maverickApi.Services
                 usuarioExistente.PasswordHash = BCrypt.Net.BCrypt.HashPassword(cambiarPasswordDto.NuevaPassword);
 
                 await _dbContext.SaveChangesAsync();
-
-                usuarioExistente.BorrarHash();
+                var usuarioMostrar = usuarioExistente;
+                usuarioMostrar.BorrarHash();
                 _logger.LogInformation("Se actualizo exitosamente la contraseña del usuario: {Nombre}.", usuarioExistente.Nombre);
                 return new RespuestaApi<Usuario>
                 {
                     Exito = true,
                     Mensaje = "Contraseña actualizada correctamente",
-                    Datos = usuarioExistente
+                    Datos = usuarioMostrar
                 };
             }
             catch (Exception ex)
@@ -309,13 +309,14 @@ namespace maverickApi.Services
 
                 usuarioExistente.Activo = editarEstadoDto.NuevoEstado;
                 await _dbContext.SaveChangesAsync();
-                usuarioExistente.BorrarHash();
+                var usuarioMostrar = usuarioExistente;
+                usuarioMostrar.BorrarHash();
                 _logger.LogInformation("Se actualizo el estado de el usuario: {Nombre} exitosamente.", usuarioExistente.Nombre);
                 return new RespuestaApi<Usuario>
                 {
                     Exito = true,
                     Mensaje = "Se actualizo el usuario correctamente",
-                    Datos = usuarioExistente
+                    Datos = usuarioMostrar
                 };
 
             }

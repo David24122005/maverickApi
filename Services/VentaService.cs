@@ -51,7 +51,6 @@ namespace maverickApi.Services
                         Datos = null
                     };
                 }
-                usuario.BorrarHash();
                 var cliente = await _dbContext.Clientes.FirstOrDefaultAsync(c => c.Id == venta.ClienteId);
                 if (venta.ClienteId != 0)
                 {
@@ -71,7 +70,6 @@ namespace maverickApi.Services
                 {
                     NumeroVenta = $"001-{DateTime.Now:yyyyMMdd}-{await ObtenerSiguienteVentaAsync():D8}",
                     UsuarioId = usuarioId,
-                    Usuario = usuario,
                     ClienteId = venta.ClienteId,
                     Cliente = cliente ?? null
                 };
@@ -129,6 +127,8 @@ namespace maverickApi.Services
                 _dbContext.Ventas.Add(nuevaVenta);
                 await _dbContext.SaveChangesAsync();
                 await tx.CommitAsync();
+
+                nuevaVenta.Usuario.BorrarHash();
 
                 _logger.LogInformation("Venta registrada exitosamente. Con id: {Id}, con un monto total de: ${Total}", nuevaVenta.Id, nuevaVenta.Total);
                 return new RespuestaApi<Venta>

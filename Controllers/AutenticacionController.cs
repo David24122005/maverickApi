@@ -17,6 +17,7 @@ namespace maverickApi.Controllers
             _iAutenticacionService = iAutenticacionService;
         }
 
+        //http://localhost:5000/api/Autenticacion/login
         [HttpPost("login")]
         public async Task<ActionResult<RespuestaApi<AutenticacionRespuesta>>> IniciarSesion(Autenticacion autenticacion)
         {
